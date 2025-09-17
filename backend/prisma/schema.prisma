@@ -1,0 +1,175 @@
+// Coast-Kavach Prisma schema
+// PostgreSQL + PostGIS (use native types for geometry via unsupported types)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  citizen
+  marine_worker
+  analyst
+  moderator
+  admin
+}
+
+model User {
+  id            String   @id @default(cuid())
+  phone         String   @unique
+  name          String?
+  role          Role     @default(citizen)
+  language      String   @default("en")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  reports       Report[]
+  forumPosts    ForumPost[]
+  sos           SOS[]
+  resourceReqs  ResourceRequest[]
+  warningsIssued Warning[]
+  forumComments  ForumComment[]
+  forumReactions ForumReaction[]
+}
+
+model Report {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  type         String
+  description  String
+  mediaUrl     String?
+  // GeoJSON Point stored via PostGIS geometry
+  location     Unsupported("geometry(Point,4326)")
+  trustScore   Float    @default(0)
+  status       String   @default("pending")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  resourceReq  ResourceRequest?
+}
+
+model ResourceRequest {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  reportId    String?  @unique
+  report      Report?  @relation(fields: [reportId], references: [id])
+  type        String
+  description String
+  urgency     Int      @default(1)
+  location    Unsupported("geometry(Point,4326)")
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Warning {
+  id          String   @id @default(cuid())
+  issuerId    String
+  issuer      User     @relation(fields: [issuerId], references: [id])
+  sourceRole  Role
+  type        String
+  message     String
+  message_i18n Json?   // translations map
+  severity    Int      // 1-5
+  area        Unsupported("geometry(Polygon,4326)")
+  validFrom   DateTime
+  validTo     DateTime
+  createdAt   DateTime @default(now())
+}
+
+model ForumPost {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        String   // help | info | offer
+  content     String
+  content_i18n Json?   // legacy
+  mediaUrl    String?
+  location    Unsupported("geometry(Point,4326)")?
+  trustScore  Float    @default(0)
+  urgencyScore Int?    // 0-100
+  aiStatus    String?  // pending | ready | error
+  moderationFlags Json?
+  rationale   Json?
+  translations Json?
+  summary     Json?
+  language    String?  @default("en")
+  status      String   @default("active") // active | under_review | removed
+  hidden      Boolean  @default(false)
+  pinned      Boolean  @default(false)
+  locked      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  comments    ForumComment[]
+  reactions   ForumReaction[]
+}
+
+model ForumComment {
+  id        String   @id @default(cuid())
+  postId    String
+  post      ForumPost @relation(fields: [postId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  language  String?  @default("en")
+  createdAt DateTime @default(now())
+}
+
+model ForumReaction {
+  id        String   @id @default(cuid())
+  postId    String
+  post      ForumPost @relation(fields: [postId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  emoji     String
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId, emoji])
+}
+
+model SocialPost {
+  id         String   @id @default(cuid())
+  platform   String
+  content    String
+  mediaUrl   String?
+  location   Unsupported("geometry(Point,4326)")?
+  trustScore Float    @default(0)
+  createdAt  DateTime @default(now())
+}
+
+model SOS {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  message     String?
+  location    Unsupported("geometry(Point,4326)")
+  delivered   Boolean  @default(false)
+  channel     String   // internet | mesh | sms | call
+  createdAt   DateTime @default(now())
+}
+
+model SyncQueue {
+  id        String   @id @default(cuid())
+  userId    String
+  kind      String
+  payload   Json
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EducationalResource {
+  id         String   @id @default(cuid())
+  title      String
+  content    String
+  content_i18n Json?
+  mediaUrl   String?
+  createdAt  DateTime @default(now())
+}
+
+// Indexes for geospatial queries (created via raw SQL migrations typically)
+

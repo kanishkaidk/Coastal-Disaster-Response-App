@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Coast-Kavach",
+    "slug": "coast-kavach",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0369A1"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0369A1"
+      }
+    },
+    "plugins": [
+      "expo-localization"
+    ]
+  }
+}
