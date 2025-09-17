@@ -1,0 +1,9 @@
+{
+  "name": "ocean-disaster-response",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "ai-ml-services"
+  ]
+}
