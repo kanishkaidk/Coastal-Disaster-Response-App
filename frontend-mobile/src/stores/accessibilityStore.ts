@@ -12,6 +12,7 @@ export interface AccessibilityPreferences {
   screenReader: boolean;
   hapticFeedback: boolean;
   soundEffects: boolean;
+  voiceModulated: boolean;
   language: string;
   ttsRate: number;
   ttsPitch: number;
@@ -26,6 +27,7 @@ interface AccessibilityState {
   // Actions
   initializeAccessibility: () => Promise<void>;
   updatePreferences: (updates: Partial<AccessibilityPreferences>) => void;
+  setFontSize: (size: 'small' | 'medium' | 'large' | 'extra-large') => void;
   speak: (text: string, options?: { priority?: 'high' | 'normal' | 'low' }) => void;
   stopSpeaking: () => void;
   hapticFeedback: (type: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error') => void;
@@ -42,6 +44,7 @@ const defaultPreferences: AccessibilityPreferences = {
   screenReader: false,
   hapticFeedback: true,
   soundEffects: true,
+  voiceModulated: false,
   language: 'en',
   ttsRate: 0.5,
   ttsPitch: 1.0,
@@ -92,6 +95,15 @@ export const useAccessibilityStore = create<AccessibilityState>()(
         if (soundEffects) {
           get().playSound('success');
         }
+      },
+
+      setFontSize: (size: 'small' | 'medium' | 'large' | 'extra-large') => {
+        set((state) => ({
+          preferences: {
+            ...state.preferences,
+            fontSize: size,
+          },
+        }));
       },
 
       speak: (text: string, options: { priority?: 'high' | 'normal' | 'low' } = {}) => {

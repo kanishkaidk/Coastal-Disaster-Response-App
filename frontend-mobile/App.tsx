@@ -15,6 +15,7 @@ import { useEffect } from 'react';
 // Screens
 import LandingScreen from './src/screens/LandingScreen';
 import AuthScreen from './src/screens/AuthScreen';
+import OnboardingScreen from './src/screens/OnboardingScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import MapScreen from './src/screens/MapScreen';
 import ReportScreen from './src/screens/ReportScreen';
@@ -50,6 +51,25 @@ function AuthStack() {
   );
 }
 
+function AuthenticatedStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+      <Stack.Screen name="MainTabs" component={MainTabs} />
+      <Stack.Screen name="SOS" component={SOSScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function MainStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="MainTabs" component={MainTabs} />
+      <Stack.Screen name="SOS" component={SOSScreen} />
+    </Stack.Navigator>
+  );
+}
+
 function MainTabs() {
   const { isAdmin } = useAuthStore();
   const { isHighContrast } = useAccessibilityStore();
@@ -66,9 +86,18 @@ function MainTabs() {
           tabBarStyle: {
             backgroundColor: isHighContrast ? '#000000' : '#FFFFFF',
             borderTopColor: isHighContrast ? '#FFFFFF' : '#E5E7EB',
-            height: 80,
-            paddingBottom: 20,
-            paddingTop: 10,
+            height: 90,
+            paddingBottom: 30,
+            paddingTop: 15,
+            elevation: 12,
+            shadowColor: '#000',
+            shadowOffset: {
+              width: 0,
+              height: -4,
+            },
+            shadowOpacity: 0.15,
+            shadowRadius: 8,
+            borderTopWidth: 2,
           },
           tabBarLabelStyle: {
             fontSize: 12,
@@ -116,16 +145,23 @@ function MainTabs() {
 }
 
 function AppContent() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const { initializeAccessibility } = useAccessibilityStore();
 
   useEffect(() => {
     initializeAccessibility();
   }, []);
 
+  // Check if user needs onboarding (no language or role set)
+  const needsOnboarding = isAuthenticated && (!user?.language || !user?.role);
+
   return (
     <NavigationContainer>
-      {isAuthenticated ? <MainTabs /> : <AuthStack />}
+      {isAuthenticated ? (
+        needsOnboarding ? <AuthenticatedStack /> : <MainStack />
+      ) : (
+        <AuthStack />
+      )}
     </NavigationContainer>
   );
 }
