@@ -24,7 +24,7 @@ import { colors, typography, spacing, borderRadius, shadows } from '../theme/the
 const AuthScreen: React.FC = () => {
   const { t } = useTranslation();
   const navigation = useNavigation();
-  const { login, isLoading, error } = useAuthStore();
+  const { login, isLoading, error, updateUser } = useAuthStore();
   const { speak, hapticFeedback, getFontSize } = useAccessibilityStore();
 
   // Form state
@@ -198,7 +198,7 @@ const AuthScreen: React.FC = () => {
         accessibilityRole="button"
       >
         <LinearGradient
-          colors={colors.gradients.primary}
+          colors={colors.gradients.primary as [string, string]}
           style={styles.buttonGradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -265,7 +265,7 @@ const AuthScreen: React.FC = () => {
           accessibilityRole="button"
         >
           <LinearGradient
-            colors={colors.gradients.primary}
+            colors={colors.gradients.primary as [string, string]}
             style={styles.buttonGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -350,7 +350,7 @@ const AuthScreen: React.FC = () => {
         accessibilityRole="button"
       >
         <LinearGradient
-          colors={colors.gradients.primary}
+          colors={colors.gradients.primary as [string, string]}
           style={styles.buttonGradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -443,7 +443,7 @@ const AuthScreen: React.FC = () => {
           accessibilityRole="button"
         >
           <LinearGradient
-            colors={colors.gradients.success}
+            colors={colors.gradients.success as [string, string]}
             style={styles.buttonGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -461,7 +461,7 @@ const AuthScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient
-        colors={colors.gradients.ocean}
+        colors={colors.gradients.ocean as [string, string, string]}
         style={styles.background}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}

@@ -16,8 +16,6 @@ const resources = {
       report: 'Report',
       resources: 'Resources',
       profile: 'Profile',
-      admin: 'Admin',
-      sos: 'SOS',
       
       // Landing Screen
       welcome: 'Welcome to Coast-Kavach',
@@ -66,7 +64,6 @@ const resources = {
       sendSms: 'Send SMS',
       
       // Map Screen
-      map: 'Map',
       legend: 'Legend',
       filters: 'Filters',
       refresh: 'Refresh',
@@ -75,7 +72,6 @@ const resources = {
       offlineBanner: 'You are offline. Some features may be limited.',
       
       // Report Screen
-      reportHazard: 'Report Hazard',
       selectLocation: 'Select Location',
       useCurrentLocation: 'Use Current Location',
       selectType: 'Select Hazard Type',
@@ -93,17 +89,14 @@ const resources = {
       submit: 'Submit Report',
       submitting: 'Submitting...',
       reportSubmitted: 'Report Submitted',
-      trustScore: 'Trust Score',
       aiSummary: 'AI Summary',
       translation: 'Translation',
       
       // SOS Screen
-      sos: 'SOS',
       helpMe: 'Help Me!',
       emergency: 'Emergency',
       sendSos: 'Send SOS',
       sending: 'Sending...',
-      sosSent: 'SOS Sent',
       sosFailed: 'SOS Failed',
       tryingNetwork: 'Trying network...',
       tryingMesh: 'Trying mesh...',
@@ -111,8 +104,6 @@ const resources = {
       tryingCall: 'Trying call...',
       
       // Resources Screen
-      resources: 'Resources',
-      requestResources: 'Request Resources',
       offerHelp: 'Offer Help',
       resourceType: 'Resource Type',
       quantity: 'Quantity',
@@ -123,7 +114,6 @@ const resources = {
       critical: 'Critical',
       
       // Profile Screen
-      profile: 'Profile',
       personalInfo: 'Personal Information',
       name: 'Name',
       phone: 'Phone',
@@ -145,7 +135,6 @@ const resources = {
       adminDashboard: 'Admin Dashboard',
       stats: 'Statistics',
       activePosts: 'Active Posts',
-      warnings: 'Warnings',
       flaggedItems: 'Flagged Items',
       liveMap: 'Live Map',
       moderation: 'Moderation',
@@ -178,12 +167,9 @@ const resources = {
       ok: 'OK',
       
       // Accessibility
-      accessibility: 'Accessibility',
-      voiceAssistance: 'Voice Assistance',
       highContrast: 'High Contrast',
       fontSize: 'Font Size',
       small: 'Small',
-      medium: 'Medium',
       large: 'Large',
       extraLarge: 'Extra Large',
       reducedMotion: 'Reduced Motion',
@@ -193,9 +179,6 @@ const resources = {
       
       // AI/ML
       trustScore: 'Trust Score',
-      aiSummary: 'AI Summary',
-      translation: 'Translation',
-      moderation: 'Moderation',
       spam: 'Spam',
       abuse: 'Abuse',
       offTopic: 'Off Topic',
@@ -212,7 +195,6 @@ const resources = {
       permissionError: 'Permission denied. Please check your settings.',
       
       // Success Messages
-      reportSubmitted: 'Report submitted successfully',
       sosSent: 'SOS sent successfully',
       resourceRequested: 'Resource request submitted',
       settingsSaved: 'Settings saved successfully',
@@ -360,7 +342,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: Localization.locale?.split('-')[0] || 'en',
+    lng: Localization.getLocales()[0]?.languageCode || 'en',
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false,

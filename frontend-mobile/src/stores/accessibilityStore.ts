@@ -28,7 +28,7 @@ interface AccessibilityState {
   initializeAccessibility: () => Promise<void>;
   updatePreferences: (updates: Partial<AccessibilityPreferences>) => void;
   setFontSize: (size: 'small' | 'medium' | 'large' | 'extra-large') => void;
-  speak: (text: string, options?: { priority?: 'high' | 'normal' | 'low' }) => void;
+  speak: (text: string, options?: { priority?: 'high' | 'normal' | 'low'; language?: string }) => void;
   stopSpeaking: () => void;
   hapticFeedback: (type: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error') => void;
   playSound: (type: 'success' | 'error' | 'warning' | 'notification') => void;
@@ -106,22 +106,27 @@ export const useAccessibilityStore = create<AccessibilityState>()(
         }));
       },
 
-      speak: (text: string, options: { priority?: 'high' | 'normal' | 'low' } = {}) => {
-        const { voiceAssistance, language, ttsRate, ttsPitch, ttsVolume } = get().preferences;
+      speak: (text: string, options: { priority?: 'high' | 'normal' | 'low'; language?: string } = {}) => {
+        const { voiceAssistance, language: defaultLanguage, ttsRate, ttsPitch, ttsVolume, voiceModulated } = get().preferences;
         
         if (!voiceAssistance) return;
 
         const priority = options.priority || 'normal';
+        const language = options.language || defaultLanguage;
         
         // Stop any current speech for high priority messages
         if (priority === 'high') {
           Speech.stop();
         }
 
+        // Apply voice modulation if enabled
+        const modulatedRate = voiceModulated ? ttsRate * 0.8 : ttsRate;
+        const modulatedPitch = voiceModulated ? ttsPitch * 1.2 : ttsPitch;
+
         Speech.speak(text, {
           language,
-          rate: ttsRate,
-          pitch: ttsPitch,
+          rate: modulatedRate,
+          pitch: modulatedPitch,
           volume: ttsVolume,
           onStart: () => {
             if (priority === 'high') {

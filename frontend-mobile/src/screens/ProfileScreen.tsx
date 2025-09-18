@@ -22,16 +22,10 @@ const ProfileScreen: React.FC = () => {
   const { t } = useTranslation();
   const { user, updateUser, logout } = useAuthStore();
   const { 
-    isHighContrast, 
-    fontSize, 
-    enableTTS, 
-    enableHaptics, 
-    enableSounds,
-    toggleHighContrast,
+    preferences,
+    updatePreferences,
     setFontSize,
-    toggleTTS,
-    toggleHaptics,
-    toggleSounds
+    getFontSize
   } = useAccessibilityStore();
   const { networkStatus, lastSync } = useAppStore();
   
@@ -47,9 +41,9 @@ const ProfileScreen: React.FC = () => {
   // Form state
   const [formData, setFormData] = useState({
     name: user?.name || '',
-    email: user?.email || '',
+    email: user?.phone || '',
     phone: user?.phone || '',
-    emergencyContacts: user?.emergencyContacts?.join(', ') || '',
+    emergencyContacts: user?.emergencyContacts?.map(c => `${c.name}:${c.phone}`).join(', ') || '',
     preferences: user?.preferences || {}
   });
 
@@ -75,7 +69,16 @@ const ProfileScreen: React.FC = () => {
       
       const updateData = {
         ...formData,
-        emergencyContacts: formData.emergencyContacts.split(',').map(contact => contact.trim()).filter(Boolean)
+        emergencyContacts: formData.emergencyContacts.split(',').map(contact => {
+          const [name, phone] = contact.trim().split(':');
+          return { name: name?.trim() || '', phone: phone?.trim() || '' };
+        }).filter(c => c.name && c.phone),
+        preferences: {
+          notifications: true,
+          voiceAssistance: preferences.voiceAssistance,
+          highContrast: preferences.highContrast,
+          fontSize: preferences.fontSize
+        }
       };
 
       await api.put(`/users/${user?.id}`, updateData);
@@ -292,10 +295,10 @@ const ProfileScreen: React.FC = () => {
               <Text style={styles.settingDescription}>Improve visibility with high contrast colors</Text>
             </View>
             <Switch
-              value={isHighContrast}
-              onValueChange={toggleHighContrast}
+              value={preferences.highContrast}
+              onValueChange={(value) => updatePreferences({ highContrast: value })}
               trackColor={{ false: '#e5e7eb', true: '#3b82f6' }}
-              thumbColor={isHighContrast ? 'white' : '#f3f4f6'}
+              thumbColor={preferences.highContrast ? 'white' : '#f3f4f6'}
             />
           </View>
 
@@ -305,10 +308,10 @@ const ProfileScreen: React.FC = () => {
               <Text style={styles.settingDescription}>Enable voice announcements</Text>
             </View>
             <Switch
-              value={enableTTS}
-              onValueChange={toggleTTS}
+              value={preferences.voiceAssistance}
+              onValueChange={(value) => updatePreferences({ voiceAssistance: value })}
               trackColor={{ false: '#e5e7eb', true: '#3b82f6' }}
-              thumbColor={enableTTS ? 'white' : '#f3f4f6'}
+              thumbColor={preferences.voiceAssistance ? 'white' : '#f3f4f6'}
             />
           </View>
 
@@ -318,10 +321,10 @@ const ProfileScreen: React.FC = () => {
               <Text style={styles.settingDescription}>Enable vibration feedback</Text>
             </View>
             <Switch
-              value={enableHaptics}
-              onValueChange={toggleHaptics}
+              value={preferences.hapticFeedback}
+              onValueChange={(value) => updatePreferences({ hapticFeedback: value })}
               trackColor={{ false: '#e5e7eb', true: '#3b82f6' }}
-              thumbColor={enableHaptics ? 'white' : '#f3f4f6'}
+              thumbColor={preferences.hapticFeedback ? 'white' : '#f3f4f6'}
             />
           </View>
 
@@ -331,10 +334,10 @@ const ProfileScreen: React.FC = () => {
               <Text style={styles.settingDescription}>Enable audio notifications</Text>
             </View>
             <Switch
-              value={enableSounds}
-              onValueChange={toggleSounds}
+              value={preferences.soundEffects}
+              onValueChange={(value) => updatePreferences({ soundEffects: value })}
               trackColor={{ false: '#e5e7eb', true: '#3b82f6' }}
-              thumbColor={enableSounds ? 'white' : '#f3f4f6'}
+              thumbColor={preferences.soundEffects ? 'white' : '#f3f4f6'}
             />
           </View>
 
@@ -346,14 +349,14 @@ const ProfileScreen: React.FC = () => {
             <View style={styles.fontSizeControls}>
               <TouchableOpacity 
                 style={styles.fontSizeButton}
-                onPress={() => setFontSize(Math.max(14, fontSize - 2))}
+                onPress={() => setFontSize('small')}
               >
                 <Ionicons name="remove" size={16} color="#6b7280" />
               </TouchableOpacity>
-              <Text style={styles.fontSizeText}>{fontSize}px</Text>
+              <Text style={styles.fontSizeText}>{getFontSize()}px</Text>
               <TouchableOpacity 
                 style={styles.fontSizeButton}
-                onPress={() => setFontSize(Math.min(24, fontSize + 2))}
+                onPress={() => setFontSize('large')}
               >
                 <Ionicons name="add" size={16} color="#6b7280" />
               </TouchableOpacity>
@@ -367,7 +370,7 @@ const ProfileScreen: React.FC = () => {
           
           <View style={styles.statusItem}>
             <Ionicons 
-              name={networkStatus === 'online' ? 'wifi' : 'wifi-off'} 
+              name={networkStatus === 'online' ? 'wifi' : 'wifi-outline'} 
               size={20} 
               color={networkStatus === 'online' ? '#059669' : '#dc2626'} 
             />
