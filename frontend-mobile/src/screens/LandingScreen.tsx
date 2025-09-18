@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   Dimensions,
   StatusBar,
+  Animated,
+  Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -24,32 +26,59 @@ const LandingScreen: React.FC = () => {
   const navigation = useNavigation();
   const { speak, hapticFeedback, getFontSize } = useAccessibilityStore();
   const { logout } = useAuthStore();
+  
+  const [showLanguageSelection, setShowLanguageSelection] = useState(false);
+  const [waveAnimation] = useState(new Animated.Value(0));
+  const [fadeAnimation] = useState(new Animated.Value(1));
+
+  const languages = [
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' },
+    { code: 'ta', name: 'தமிழ்', flag: '🇮🇳' },
+    { code: 'te', name: 'తెలుగు', flag: '🇮🇳' },
+    { code: 'bn', name: 'বাংলা', flag: '🇮🇳' },
+    { code: 'gu', name: 'ગુજરાતી', flag: '🇮🇳' },
+    { code: 'mr', name: 'मराठी', flag: '🇮🇳' },
+    { code: 'kn', name: 'ಕನ್ನಡ', flag: '🇮🇳' },
+  ];
 
   useEffect(() => {
     speak('Welcome to Coast-Kavach, India\'s premier coastal disaster response platform', { priority: 'high' });
+    
+    // Start wave animation
+    startWaveAnimation();
+    
+    // Show language selection after 3 seconds
+    const timer = setTimeout(() => {
+      setShowLanguageSelection(true);
+      speak('Please select your language');
+    }, 3000);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  const handleButtonPress = (action: string) => {
-    hapticFeedback('medium');
-    speak(`${action} button pressed`);
-    
-    switch (action) {
-      case 'login':
-        navigation.navigate('Auth' as never);
-        break;
-      case 'signup':
-        navigation.navigate('Auth' as never);
-        break;
-      case 'admin':
-        navigation.navigate('Auth' as never);
-        break;
-    }
+  const startWaveAnimation = () => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(waveAnimation, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(waveAnimation, {
+          toValue: 0,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
   };
 
-  const handleLanguageChange = () => {
-    hapticFeedback('light');
-    speak('Language selection');
-    // TODO: Implement language picker
+  const handleLanguageSelect = (languageCode: string) => {
+    hapticFeedback('medium');
+    speak(`Language selected: ${languages.find(l => l.code === languageCode)?.name}`);
+    setShowLanguageSelection(false);
+    // TODO: Implement language change
   };
 
   const handleAccessibilityToggle = () => {
@@ -58,35 +87,19 @@ const LandingScreen: React.FC = () => {
     // TODO: Implement accessibility settings
   };
 
-  const handleRestart = () => {
-    hapticFeedback('medium');
-    speak('Restarting app');
-    logout();
-  };
-
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+      <StatusBar barStyle="light-content" backgroundColor="#0066CC" />
       
-      {/* Background Gradient */}
+      {/* Main Background Gradient - Ocean Theme */}
       <LinearGradient
-        colors={['#0f172a', '#1e293b', '#334155']}
+        colors={['#0066CC', '#004499', '#002266']}
         style={styles.background}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        {/* Header */}
+        {/* Header with Accessibility */}
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={handleLanguageChange}
-            accessible={true}
-            accessibilityLabel="Select language"
-            accessibilityRole="button"
-          >
-            <Ionicons name="language" size={20} color="white" />
-          </TouchableOpacity>
-          
           <TouchableOpacity
             style={styles.headerButton}
             onPress={handleAccessibilityToggle}
@@ -94,130 +107,96 @@ const LandingScreen: React.FC = () => {
             accessibilityLabel="Accessibility settings"
             accessibilityRole="button"
           >
-            <Ionicons name="accessibility" size={20} color="white" />
+            <Ionicons name="accessibility" size={24} color="white" />
           </TouchableOpacity>
         </View>
 
+        {/* Main Content */}
         <View style={styles.content}>
-          {/* Hero Section */}
+          {/* Logo and Title Section */}
           <View style={styles.heroSection}>
             <View style={styles.logoContainer}>
-              <View style={styles.armorLogo}>
-                <LinearGradient
-                  colors={['#3b82f6', '#1d4ed8', '#1e40af']}
-                  style={styles.armorOuter}
-                >
-                  <View style={styles.armorInner}>
-                    <View style={styles.waveContainer}>
-                      <Text style={styles.waveIcon}>🌊</Text>
-                      <View style={styles.waveEffect} />
-                    </View>
-                    <View style={styles.armorDetails}>
-                      <View style={styles.armorLine} />
-                      <View style={styles.armorLine} />
-                      <View style={styles.armorLine} />
-                    </View>
-                  </View>
-                </LinearGradient>
-              </View>
+              <LinearGradient
+                colors={['#FFFFFF', '#E6F3FF']}
+                style={styles.logoGradient}
+              >
+                <Text style={styles.logoText}>🌊</Text>
+              </LinearGradient>
             </View>
             
-            <Text style={[styles.appName, { fontSize: getFontSize() * 2.2 }]}>
+            <Text style={[styles.appName, { fontSize: getFontSize() * 2.5 }]}>
               Coast-कवच
             </Text>
             
-            <Text style={[styles.tagline, { fontSize: getFontSize() * 1.1 }]}>
+            <Text style={[styles.tagline, { fontSize: getFontSize() * 1.2 }]}>
               India's Coastal Disaster Response Platform
             </Text>
             
-            <Text style={[styles.description, { fontSize: getFontSize() * 0.95 }]}>
-              Real-time warnings, community reports, and emergency response for India's 7,500+ km coastline
+            <Text style={[styles.description, { fontSize: getFontSize() * 1.0 }]}>
+              Protecting India's 7,500+ km coastline with real-time warnings and community-driven safety
             </Text>
           </View>
 
-          {/* Action Buttons */}
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={[styles.primaryButton, styles.loginButton]}
-              onPress={() => handleButtonPress('login')}
-              accessible={true}
-              accessibilityLabel="Login to Coast-Kavach"
-              accessibilityRole="button"
-              accessibilityHint="Access your account and emergency features"
+          {/* Wave Animation at Bottom */}
+          <View style={styles.waveContainer}>
+            <Animated.View
+              style={[
+                styles.wave,
+                {
+                  transform: [
+                    {
+                      translateY: waveAnimation.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, -10],
+                      }),
+                    },
+                  ],
+                },
+              ]}
             >
-              <LinearGradient
-                colors={['#3b82f6', '#1d4ed8', '#1e40af']}
-                style={styles.buttonGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <Ionicons name="log-in" size={22} color="white" />
-                <Text style={[styles.buttonText, { fontSize: getFontSize() * 1.1 }]}>
-                  LOGIN
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.primaryButton, styles.signupButton]}
-              onPress={() => handleButtonPress('signup')}
-              accessible={true}
-              accessibilityLabel="Create new account"
-              accessibilityRole="button"
-              accessibilityHint="Register for Coast-Kavach to report hazards and receive warnings"
-            >
-              <LinearGradient
-                colors={['#10b981', '#059669', '#047857']}
-                style={styles.buttonGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <Ionicons name="person-add" size={22} color="white" />
-                <Text style={[styles.buttonText, { fontSize: getFontSize() * 1.1 }]}>
-                  CREATE ACCOUNT
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.secondaryButton, styles.adminButton]}
-              onPress={() => handleButtonPress('admin')}
-              accessible={true}
-              accessibilityLabel="Admin access"
-              accessibilityRole="button"
-              accessibilityHint="Access administrative features for marine workers and officials"
-            >
-              <Ionicons name="shield" size={20} color="white" />
-              <Text style={[styles.secondaryButtonText, { fontSize: getFontSize() * 0.95 }]}>
-                Sign in as Admin
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.secondaryButton, styles.restartButton]}
-              onPress={handleRestart}
-              accessible={true}
-              accessibilityLabel="Restart application"
-              accessibilityRole="button"
-              accessibilityHint="Return to the beginning of the application"
-            >
-              <Ionicons name="refresh" size={20} color="white" />
-              <Text style={[styles.secondaryButtonText, { fontSize: getFontSize() * 0.95 }]}>
-                Restart App
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Footer */}
-          <View style={styles.footer}>
-            <Text style={[styles.footerText, { fontSize: getFontSize() * 0.9 }]}>
-              Developed for India's Coastal Communities
-            </Text>
-            <Text style={[styles.footerSubtext, { fontSize: getFontSize() * 0.8 }]}>
-              In partnership with IMD, NDMA, and State Disaster Management Authorities
-            </Text>
+              <View style={styles.wave1} />
+              <View style={styles.wave2} />
+              <View style={styles.wave3} />
+            </Animated.View>
           </View>
         </View>
+
+        {/* Language Selection Modal */}
+        <Modal
+          visible={showLanguageSelection}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowLanguageSelection(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.languageModal}>
+              <Text style={[styles.modalTitle, { fontSize: getFontSize() * 1.3 }]}>
+                Select Language
+              </Text>
+              <Text style={[styles.modalSubtitle, { fontSize: getFontSize() * 0.9 }]}>
+                Choose your preferred language
+              </Text>
+              
+              <View style={styles.languageGrid}>
+                {languages.map((language) => (
+                  <TouchableOpacity
+                    key={language.code}
+                    style={styles.languageButton}
+                    onPress={() => handleLanguageSelect(language.code)}
+                    accessible={true}
+                    accessibilityLabel={`Select ${language.name}`}
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.languageFlag}>{language.flag}</Text>
+                    <Text style={[styles.languageName, { fontSize: getFontSize() * 0.9 }]}>
+                      {language.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </View>
+        </Modal>
       </LinearGradient>
     </SafeAreaView>
   );
@@ -232,7 +211,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
@@ -241,86 +220,42 @@ const styles = StyleSheet.create({
   headerButton: {
     padding: spacing.sm,
     borderRadius: borderRadius.full,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   content: {
     flex: 1,
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl,
     justifyContent: 'space-between',
   },
   heroSection: {
     alignItems: 'center',
-    marginBottom: spacing.md,
-    paddingTop: spacing.sm,
+    paddingTop: spacing['3xl'],
+    flex: 1,
+    justifyContent: 'center',
   },
   logoContainer: {
-    marginBottom: spacing.md,
+    marginBottom: spacing['2xl'],
   },
-  armorLogo: {
-    ...shadows.xl,
-  },
-  armorOuter: {
+  logoGradient: {
     width: 120,
     height: 120,
-    borderRadius: 25,
-    padding: 6,
+    borderRadius: 60,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    ...shadows.xl,
+    elevation: 8,
   },
-  armorInner: {
-    width: 100,
-    height: 100,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  waveContainer: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  waveIcon: {
-    fontSize: 45,
-    marginBottom: 4,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  waveEffect: {
-    position: 'absolute',
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: 'rgba(59, 130, 246, 0.2)',
-    borderWidth: 2,
-    borderColor: 'rgba(59, 130, 246, 0.4)',
-  },
-  armorDetails: {
-    position: 'absolute',
-    bottom: 6,
-    left: 6,
-    right: 6,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  armorLine: {
-    width: 6,
-    height: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    borderRadius: 1,
+  logoText: {
+    fontSize: 60,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
   },
   appName: {
     fontFamily: typography.fontFamily.bold,
     color: 'white',
     textAlign: 'center',
-    marginBottom: spacing.xs,
+    marginBottom: spacing.md,
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 4,
@@ -329,98 +264,118 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily.semiBold,
     color: 'white',
     textAlign: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.lg,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
   description: {
     fontFamily: typography.fontFamily.medium,
-    color: 'white',
-    textAlign: 'center',
-    lineHeight: 22,
-    paddingHorizontal: spacing.md,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  buttonContainer: {
-    marginBottom: spacing.md,
-  },
-  primaryButton: {
-    marginBottom: spacing.sm,
-    borderRadius: borderRadius.lg,
-    ...shadows.md,
-    elevation: 4,
-  },
-  loginButton: {
-    // Styles handled by gradient
-  },
-  signupButton: {
-    // Styles handled by gradient
-  },
-  buttonGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderRadius: borderRadius.lg,
-    minHeight: 44,
-  },
-  buttonText: {
-    fontFamily: typography.fontFamily.bold,
-    marginLeft: spacing.sm,
-    letterSpacing: 0.5,
-    color: 'white',
-  },
-  secondaryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    marginBottom: spacing.xs,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    ...shadows.sm,
-  },
-  adminButton: {
-    // Styles handled by secondaryButton
-  },
-  restartButton: {
-    // Styles handled by secondaryButton
-  },
-  secondaryButtonText: {
-    fontFamily: typography.fontFamily.semiBold,
-    color: 'white',
-    marginLeft: spacing.sm,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  footer: {
-    alignItems: 'center',
-    paddingTop: spacing.md,
-  },
-  footerText: {
-    fontFamily: typography.fontFamily.semiBold,
-    color: 'white',
-    textAlign: 'center',
-    marginBottom: spacing.xs,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  footerSubtext: {
-    fontFamily: typography.fontFamily.medium,
     color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    lineHeight: 24,
+    paddingHorizontal: spacing.lg,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
+    textShadowRadius: 2,
+  },
+  waveContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 100,
+    overflow: 'hidden',
+  },
+  wave: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 100,
+  },
+  wave1: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
+  },
+  wave2: {
+    position: 'absolute',
+    bottom: 10,
+    left: 0,
+    right: 0,
+    height: 35,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+  },
+  wave3: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    height: 30,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+  },
+  languageModal: {
+    backgroundColor: 'white',
+    borderRadius: borderRadius.xl,
+    padding: spacing['2xl'],
+    width: '100%',
+    maxWidth: 400,
+    ...shadows.xl,
+    elevation: 10,
+  },
+  modalTitle: {
+    fontFamily: typography.fontFamily.bold,
+    color: '#1f2937',
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  modalSubtitle: {
+    fontFamily: typography.fontFamily.medium,
+    color: '#6b7280',
+    textAlign: 'center',
+    marginBottom: spacing['2xl'],
+  },
+  languageGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+  },
+  languageButton: {
+    width: (width - spacing.lg * 4 - spacing.md * 3) / 4,
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.lg,
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  languageFlag: {
+    fontSize: 24,
+    marginBottom: spacing.xs,
+  },
+  languageName: {
+    fontFamily: typography.fontFamily.medium,
+    color: '#374151',
+    textAlign: 'center',
   },
 });
 
