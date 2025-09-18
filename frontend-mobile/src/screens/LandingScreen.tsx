@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-  ScrollView,
   StatusBar,
-  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,41 +24,6 @@ const LandingScreen: React.FC = () => {
   const navigation = useNavigation();
   const { speak, hapticFeedback, getFontSize } = useAccessibilityStore();
   const { logout } = useAuthStore();
-  const [currentSlide, setCurrentSlide] = useState(0);
-
-  const features = [
-    {
-      icon: 'shield-checkmark',
-      title: 'Government Verified',
-      description: 'Official warnings from IMD, NDMA, and coastal authorities',
-      color: '#10b981'
-    },
-    {
-      icon: 'people',
-      title: 'Community Driven',
-      description: 'Real-time reports from marine workers and coastal residents',
-      color: '#3b82f6'
-    },
-    {
-      icon: 'accessibility',
-      title: 'Fully Accessible',
-      description: 'Multi-language support, voice guidance, and haptic feedback',
-      color: '#8b5cf6'
-    },
-    {
-      icon: 'cloud-offline',
-      title: 'Works Offline',
-      description: 'Mesh networking, SMS fallback, and offline data storage',
-      color: '#f59e0b'
-    }
-  ];
-
-  const stats = [
-    { number: '50K+', label: 'Active Users' },
-    { number: '1M+', label: 'Warnings Issued' },
-    { number: '99.9%', label: 'Uptime' },
-    { number: '24/7', label: 'Monitoring' }
-  ];
 
   useEffect(() => {
     speak('Welcome to Coast-Kavach, India\'s premier coastal disaster response platform', { priority: 'high' });
@@ -121,7 +84,7 @@ const LandingScreen: React.FC = () => {
             accessibilityLabel="Select language"
             accessibilityRole="button"
           >
-            <Ionicons name="language" size={24} color="white" />
+            <Ionicons name="language" size={20} color="white" />
           </TouchableOpacity>
           
           <TouchableOpacity
@@ -131,7 +94,7 @@ const LandingScreen: React.FC = () => {
             accessibilityLabel="Accessibility settings"
             accessibilityRole="button"
           >
-            <Ionicons name="accessibility" size={24} color="white" />
+            <Ionicons name="accessibility" size={20} color="white" />
           </TouchableOpacity>
         </View>
 
@@ -145,7 +108,10 @@ const LandingScreen: React.FC = () => {
                   style={styles.armorOuter}
                 >
                   <View style={styles.armorInner}>
-                    <Text style={styles.tideIcon}>🌊</Text>
+                    <View style={styles.waveContainer}>
+                      <Text style={styles.waveIcon}>🌊</Text>
+                      <View style={styles.waveEffect} />
+                    </View>
                     <View style={styles.armorDetails}>
                       <View style={styles.armorLine} />
                       <View style={styles.armorLine} />
@@ -156,19 +122,18 @@ const LandingScreen: React.FC = () => {
               </View>
             </View>
             
-            <Text style={[styles.appName, { fontSize: getFontSize() * 2.5 }]}>
+            <Text style={[styles.appName, { fontSize: getFontSize() * 2.2 }]}>
               Coast-कवच
             </Text>
             
-            <Text style={[styles.tagline, { fontSize: getFontSize() * 1.2 }]}>
+            <Text style={[styles.tagline, { fontSize: getFontSize() * 1.1 }]}>
               India's Coastal Disaster Response Platform
             </Text>
             
-            <Text style={[styles.description, { fontSize: getFontSize() * 1.1 }]}>
+            <Text style={[styles.description, { fontSize: getFontSize() * 0.95 }]}>
               Real-time warnings, community reports, and emergency response for India's 7,500+ km coastline
             </Text>
           </View>
-
 
           {/* Action Buttons */}
           <View style={styles.buttonContainer}>
@@ -186,8 +151,8 @@ const LandingScreen: React.FC = () => {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Ionicons name="log-in" size={28} color="white" />
-                <Text style={[styles.buttonText, { fontSize: getFontSize() * 1.3 }]}>
+                <Ionicons name="log-in" size={22} color="white" />
+                <Text style={[styles.buttonText, { fontSize: getFontSize() * 1.1 }]}>
                   LOGIN
                 </Text>
               </LinearGradient>
@@ -207,8 +172,8 @@ const LandingScreen: React.FC = () => {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Ionicons name="person-add" size={28} color="white" />
-                <Text style={[styles.buttonText, { fontSize: getFontSize() * 1.3 }]}>
+                <Ionicons name="person-add" size={22} color="white" />
+                <Text style={[styles.buttonText, { fontSize: getFontSize() * 1.1 }]}>
                   CREATE ACCOUNT
                 </Text>
               </LinearGradient>
@@ -222,9 +187,9 @@ const LandingScreen: React.FC = () => {
               accessibilityRole="button"
               accessibilityHint="Access administrative features for marine workers and officials"
             >
-              <Ionicons name="shield" size={24} color="white" />
-              <Text style={[styles.secondaryButtonText, { fontSize: getFontSize() * 1.1 }]}>
-                Marine Worker / Admin Access
+              <Ionicons name="shield" size={20} color="white" />
+              <Text style={[styles.secondaryButtonText, { fontSize: getFontSize() * 0.95 }]}>
+                Sign in as Admin
               </Text>
             </TouchableOpacity>
 
@@ -236,8 +201,8 @@ const LandingScreen: React.FC = () => {
               accessibilityRole="button"
               accessibilityHint="Return to the beginning of the application"
             >
-              <Ionicons name="refresh" size={24} color="white" />
-              <Text style={[styles.secondaryButtonText, { fontSize: getFontSize() * 1.1 }]}>
+              <Ionicons name="refresh" size={20} color="white" />
+              <Text style={[styles.secondaryButtonText, { fontSize: getFontSize() * 0.95 }]}>
                 Restart App
               </Text>
             </TouchableOpacity>
@@ -245,10 +210,10 @@ const LandingScreen: React.FC = () => {
 
           {/* Footer */}
           <View style={styles.footer}>
-            <Text style={[styles.footerText, { fontSize: getFontSize() }]}>
+            <Text style={[styles.footerText, { fontSize: getFontSize() * 0.9 }]}>
               Developed for India's Coastal Communities
             </Text>
-            <Text style={[styles.footerSubtext, { fontSize: getFontSize() * 0.9 }]}>
+            <Text style={[styles.footerSubtext, { fontSize: getFontSize() * 0.8 }]}>
               In partnership with IMD, NDMA, and State Disaster Management Authorities
             </Text>
           </View>
@@ -271,7 +236,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
-    paddingBottom: spacing.lg,
+    paddingBottom: spacing.sm,
   },
   headerButton: {
     padding: spacing.sm,
@@ -286,66 +251,76 @@ const styles = StyleSheet.create({
   },
   heroSection: {
     alignItems: 'center',
-    marginBottom: spacing.lg,
-    paddingTop: spacing.lg,
+    marginBottom: spacing.md,
+    paddingTop: spacing.sm,
   },
   logoContainer: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   armorLogo: {
     ...shadows.xl,
   },
   armorOuter: {
-    width: 140,
-    height: 140,
-    borderRadius: 20,
-    padding: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  armorInner: {
     width: 120,
     height: 120,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 15,
+    borderRadius: 25,
+    padding: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  armorInner: {
+    width: 100,
+    height: 100,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
-  tideIcon: {
-    fontSize: 50,
-    marginBottom: 8,
+  waveContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  waveIcon: {
+    fontSize: 45,
+    marginBottom: 4,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  waveEffect: {
+    position: 'absolute',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+    borderWidth: 2,
+    borderColor: 'rgba(59, 130, 246, 0.4)',
   },
   armorDetails: {
     position: 'absolute',
-    bottom: 8,
-    left: 8,
-    right: 8,
+    bottom: 6,
+    left: 6,
+    right: 6,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   armorLine: {
-    width: 8,
+    width: 6,
     height: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
     borderRadius: 1,
-  },
-  scrollIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: spacing.lg,
-    opacity: 0.8,
-  },
-  scrollText: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 14,
-    marginRight: 8,
   },
   appName: {
     fontFamily: typography.fontFamily.bold,
     color: 'white',
     textAlign: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 4,
@@ -354,7 +329,7 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily.semiBold,
     color: 'white',
     textAlign: 'center',
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
@@ -363,101 +338,17 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily.medium,
     color: 'white',
     textAlign: 'center',
-    lineHeight: 26,
+    lineHeight: 22,
     paddingHorizontal: spacing.md,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
-  statsSection: {
-    marginBottom: spacing['3xl'],
-  },
-  statsTitle: {
-    fontFamily: typography.fontFamily.bold,
-    color: 'white',
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-  },
-  statCard: {
-    width: (width - spacing.lg * 2 - spacing.md) / 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontFamily: typography.fontFamily.bold,
-    color: '#3b82f6',
-    marginBottom: spacing.xs,
-  },
-  statLabel: {
-    fontFamily: typography.fontFamily.medium,
-    color: 'rgba(255, 255, 255, 0.8)',
-    textAlign: 'center',
-  },
-  featuresSection: {
-    marginBottom: spacing['3xl'],
-  },
-  featuresTitle: {
-    fontFamily: typography.fontFamily.bold,
-    color: 'white',
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  featuresList: {
-    gap: spacing.md,
-  },
-  featureCard: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    alignItems: 'center',
-  },
-  featureIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing.md,
-  },
-  featureContent: {
-    flex: 1,
-  },
-  featureTitle: {
-    fontFamily: typography.fontFamily.bold,
-    color: 'white',
-    marginBottom: spacing.xs,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  featureDescription: {
-    fontFamily: typography.fontFamily.medium,
-    color: 'white',
-    lineHeight: 22,
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-  },
   buttonContainer: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   primaryButton: {
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
     borderRadius: borderRadius.lg,
     ...shadows.md,
     elevation: 4,
@@ -472,26 +363,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
     borderRadius: borderRadius.lg,
-    minHeight: 50,
+    minHeight: 44,
   },
   buttonText: {
     fontFamily: typography.fontFamily.bold,
-    marginLeft: spacing.md,
-    letterSpacing: 1,
+    marginLeft: spacing.sm,
+    letterSpacing: 0.5,
+    color: 'white',
   },
   secondaryButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
     borderRadius: borderRadius.md,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.3)',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     ...shadows.sm,
   },
@@ -504,14 +396,14 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     fontFamily: typography.fontFamily.semiBold,
     color: 'white',
-    marginLeft: spacing.md,
+    marginLeft: spacing.sm,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
   footer: {
     alignItems: 'center',
-    paddingTop: spacing.lg,
+    paddingTop: spacing.md,
   },
   footerText: {
     fontFamily: typography.fontFamily.semiBold,
