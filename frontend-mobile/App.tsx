@@ -12,6 +12,9 @@ import { I18nextProvider } from 'react-i18next';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 
+// Import Intl polyfill for better compatibility
+import 'intl-pluralrules';
+
 // Screens
 import LandingScreen from './src/screens/LandingScreen';
 import AuthScreen from './src/screens/AuthScreen';
@@ -165,13 +168,13 @@ function AppContent() {
     initializeAccessibility();
   }, []);
 
-  // Check if user needs onboarding (no language or role set)
-  const needsOnboarding = isAuthenticated && (!user?.language || !user?.role);
+  // Check if user needs role selection (authenticated but no role set)
+  const needsRoleSelection = isAuthenticated && !user?.role;
 
   return (
     <NavigationContainer>
       {isAuthenticated ? (
-        needsOnboarding ? <AuthenticatedStack /> : <MainStack />
+        needsRoleSelection ? <AuthStack /> : <MainStack />
       ) : (
         <AuthStack />
       )}
