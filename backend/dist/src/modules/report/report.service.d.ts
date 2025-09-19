@@ -10,6 +10,6 @@ export declare class ReportService {
             lat: number;
             lng: number;
         };
-    }): Promise<any>;
+    }): Promise<number>;
     listNearby(lat: number, lng: number, radiusMeters?: number): Promise<never[]>;
 }

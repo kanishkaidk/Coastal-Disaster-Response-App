@@ -16,6 +16,8 @@ import { useEffect } from 'react';
 import LandingScreen from './src/screens/LandingScreen';
 import AuthScreen from './src/screens/AuthScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import RoleSelectionScreen from './src/screens/RoleSelectionScreen';
+import MarineWorkerVerificationScreen from './src/screens/MarineWorkerVerificationScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import MapScreen from './src/screens/MapScreen';
 import ReportScreen from './src/screens/ReportScreen';
@@ -48,6 +50,8 @@ function AuthStack() {
       <Stack.Screen name="Landing" component={LandingScreen} />
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Auth" component={AuthScreen} />
+      <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
+      <Stack.Screen name="MarineWorkerVerification" component={MarineWorkerVerificationScreen} />
     </Stack.Navigator>
   );
 }
@@ -56,6 +60,8 @@ function AuthenticatedStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+      <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
+      <Stack.Screen name="MarineWorkerVerification" component={MarineWorkerVerificationScreen} />
       <Stack.Screen name="MainTabs" component={MainTabs} />
       <Stack.Screen name="SOS" component={SOSScreen} />
     </Stack.Navigator>

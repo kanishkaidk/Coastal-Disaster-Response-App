@@ -7,36 +7,91 @@ export declare class UserController {
     constructor(users: UserService);
     create(dto: CreateUserDto): Promise<{
         app: string;
-        data: any;
+        data: {
+            role: import(".prisma/client").$Enums.Role;
+            phone: string;
+            name: string | null;
+            language: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+        };
     }>;
     findAll(query: UserQueryDto): Promise<{
         app: string;
-        data: any;
+        data: {
+            role: import(".prisma/client").$Enums.Role;
+            phone: string;
+            name: string | null;
+            language: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            _count: {
+                reports: number;
+                forumPosts: number;
+                sos: number;
+                resourceReqs: number;
+            };
+        }[];
         pagination: {
             limit: number;
             offset: number;
-            total: any;
+            total: number;
             hasMore: boolean;
         };
     }>;
     getOne(id: string): Promise<{
         app: string;
-        data: any;
+        data: {
+            role: import(".prisma/client").$Enums.Role;
+            phone: string;
+            name: string | null;
+            language: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            _count: {
+                reports: number;
+                forumPosts: number;
+                sos: number;
+                resourceReqs: number;
+                warningsIssued: number;
+                forumComments: number;
+                forumReactions: number;
+            };
+        };
     }>;
     getStats(id: string): Promise<{
         app: string;
         data: {
             user: {
-                id: any;
-                name: any;
-                role: any;
+                id: string;
+                name: string | null;
+                role: import(".prisma/client").$Enums.Role;
             };
-            stats: any;
+            stats: {
+                reports: number;
+                forumPosts: number;
+                sos: number;
+                resourceReqs: number;
+                warningsIssued: number;
+                forumComments: number;
+                forumReactions: number;
+            };
         };
     }>;
     update(id: string, dto: UpdateUserDto, req: any): Promise<{
         app: string;
-        data: any;
+        data: {
+            role: import(".prisma/client").$Enums.Role;
+            phone: string;
+            name: string | null;
+            language: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+        };
     }>;
     remove(id: string, req: any): Promise<{
         app: string;

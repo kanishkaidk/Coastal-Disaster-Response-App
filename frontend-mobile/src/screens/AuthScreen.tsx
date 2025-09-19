@@ -91,6 +91,11 @@ const AuthScreen: React.FC = () => {
     
     // Update user role immediately
     updateUser({ role });
+    
+    // If marine worker is selected, navigate to verification screen
+    if (role === 'marine_worker') {
+      navigation.navigate('MarineWorkerVerification' as never);
+    }
   };
 
   const handleContinue = () => {

@@ -10,6 +10,7 @@ import { QueueModule } from './queue/queue.module';
 import { ForumModule } from './forum/forum.module';
 import { SosModule } from './sos/sos.module';
 import { WarningModule } from './warning/warning.module';
+import { MarineWorkerModule } from './marine-worker/marine-worker.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { WarningModule } from './warning/warning.module';
     ForumModule,
     SosModule,
     WarningModule,
+    MarineWorkerModule,
   ],
 })
 export class AppModule {}

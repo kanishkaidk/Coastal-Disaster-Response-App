@@ -5,19 +5,74 @@ import { UserQueryDto } from './dto/user-query.dto';
 export declare class UserService {
     private readonly prisma;
     constructor(prisma: PrismaService);
-    create(dto: CreateUserDto): Promise<any>;
-    findAll(query: UserQueryDto): Promise<any>;
-    getById(id: string): Promise<any>;
-    update(id: string, dto: UpdateUserDto, currentUserId: string, currentUserRole: string): Promise<any>;
+    create(dto: CreateUserDto): Promise<{
+        role: import(".prisma/client").$Enums.Role;
+        phone: string;
+        name: string | null;
+        language: string;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    findAll(query: UserQueryDto): Promise<{
+        role: import(".prisma/client").$Enums.Role;
+        phone: string;
+        name: string | null;
+        language: string;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        _count: {
+            reports: number;
+            forumPosts: number;
+            sos: number;
+            resourceReqs: number;
+        };
+    }[]>;
+    getById(id: string): Promise<{
+        role: import(".prisma/client").$Enums.Role;
+        phone: string;
+        name: string | null;
+        language: string;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        _count: {
+            reports: number;
+            forumPosts: number;
+            sos: number;
+            resourceReqs: number;
+            warningsIssued: number;
+            forumComments: number;
+            forumReactions: number;
+        };
+    }>;
+    update(id: string, dto: UpdateUserDto, currentUserId: string, currentUserRole: string): Promise<{
+        role: import(".prisma/client").$Enums.Role;
+        phone: string;
+        name: string | null;
+        language: string;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
     remove(id: string, currentUserId: string, currentUserRole: string): Promise<{
         message: string;
     }>;
     getStats(id: string): Promise<{
         user: {
-            id: any;
-            name: any;
-            role: any;
+            id: string;
+            name: string | null;
+            role: import(".prisma/client").$Enums.Role;
         };
-        stats: any;
+        stats: {
+            reports: number;
+            forumPosts: number;
+            sos: number;
+            resourceReqs: number;
+            warningsIssued: number;
+            forumComments: number;
+            forumReactions: number;
+        };
     }>;
 }
