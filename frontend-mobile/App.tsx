@@ -19,7 +19,6 @@ import 'intl-pluralrules';
 import LandingScreen from './src/screens/LandingScreen';
 import AuthScreen from './src/screens/AuthScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
-import SimpleRoleSelectionScreen from './src/screens/SimpleRoleSelectionScreen';
 import SimpleMarineWorkerVerification from './src/screens/SimpleMarineWorkerVerification';
 import SimpleMarineWorkerWork from './src/screens/SimpleMarineWorkerWork';
 import SimpleMarineWorkerWarning from './src/screens/SimpleMarineWorkerWarning';
@@ -55,7 +54,6 @@ function AuthStack() {
       <Stack.Screen name="Landing" component={LandingScreen} />
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Auth" component={AuthScreen} />
-      <Stack.Screen name="RoleSelection" component={SimpleRoleSelectionScreen} />
       <Stack.Screen name="MarineWorkerVerification" component={SimpleMarineWorkerVerification} />
       <Stack.Screen name="MarineWorkerWork" component={SimpleMarineWorkerWork} />
       <Stack.Screen name="MarineWorkerWarning" component={SimpleMarineWorkerWarning} />
@@ -67,7 +65,6 @@ function AuthenticatedStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-      <Stack.Screen name="RoleSelection" component={SimpleRoleSelectionScreen} />
       <Stack.Screen name="MarineWorkerVerification" component={SimpleMarineWorkerVerification} />
       <Stack.Screen name="MarineWorkerWork" component={SimpleMarineWorkerWork} />
       <Stack.Screen name="MarineWorkerWarning" component={SimpleMarineWorkerWarning} />
