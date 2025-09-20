@@ -19,6 +19,7 @@ import 'intl-pluralrules';
 import LandingScreen from './src/screens/LandingScreen';
 import AuthScreen from './src/screens/AuthScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import RoleSelectionScreen from './src/screens/RoleSelectionScreen';
 import MarineWorkerVerificationScreen from './src/screens/MarineWorkerVerificationScreen';
 import MarineWorkerWorkScreen from './src/screens/MarineWorkerWorkScreen';
 import MarineWorkerWarningScreen from './src/screens/MarineWorkerWarningScreen';
@@ -54,6 +55,7 @@ function AuthStack() {
       <Stack.Screen name="Landing" component={LandingScreen} />
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Auth" component={AuthScreen} />
+      <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
       <Stack.Screen name="MarineWorkerVerification" component={MarineWorkerVerificationScreen} />
       <Stack.Screen name="MarineWorkerWork" component={MarineWorkerWorkScreen} />
       <Stack.Screen name="MarineWorkerWarning" component={MarineWorkerWarningScreen} />
