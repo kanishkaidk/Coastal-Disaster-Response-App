@@ -211,6 +211,32 @@ class ApiService {
     return response.data;
   }
 
+  // Marine Worker endpoints
+  async verifyMarineWorker(data: { name: string; phone: string }) {
+    const response = await this.api.post('/marine-worker/verify', data);
+    return response.data;
+  }
+
+  async getMarineWorkerProfile() {
+    const response = await this.api.get('/marine-worker/profile');
+    return response.data;
+  }
+
+  async updateWorkDetails(data: { workToday?: string; observations?: string }) {
+    const response = await this.api.put('/marine-worker/work-details', data);
+    return response.data;
+  }
+
+  async createMarineWorkerWarning(data: { description: string; severity?: number }) {
+    const response = await this.api.post('/marine-worker/warning', data);
+    return response.data;
+  }
+
+  async getMarineWorkerWarnings() {
+    const response = await this.api.get('/marine-worker/warnings');
+    return response.data;
+  }
+
   // Health check
   async healthCheck() {
     const response = await this.api.get('/health');

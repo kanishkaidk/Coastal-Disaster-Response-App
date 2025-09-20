@@ -10,7 +10,29 @@ export declare class WarningController {
     }>;
     findAll(query: WarningQueryDto): Promise<{
         app: string;
-        data: any[];
+        data: {
+            area: {
+                type: string;
+                coordinates: number[][][];
+            };
+            translations: string | number | true | import("@prisma/client/runtime/library").JsonObject | import("@prisma/client/runtime/library").JsonArray;
+            status: string;
+            issuer: {
+                role: import(".prisma/client").$Enums.Role;
+                name: string | null;
+                id: string;
+            };
+            type: string;
+            id: string;
+            createdAt: Date;
+            message: string;
+            severity: number;
+            validFrom: Date;
+            validTo: Date;
+            issuerId: string;
+            sourceRole: import(".prisma/client").$Enums.Role;
+            message_i18n: import("@prisma/client/runtime/library").JsonValue | null;
+        }[];
         pagination: {
             limit: number;
             offset: number;
@@ -20,25 +42,66 @@ export declare class WarningController {
     }>;
     getNearby(lat: string, lng: string, radius?: string): Promise<{
         app: string;
-        data: any;
+        data: unknown;
     }>;
     getStats(): Promise<{
         app: string;
         data: {
-            total: any;
-            active: any;
-            expired: any;
-            byType: any;
-            bySeverity: any;
+            total: number;
+            active: number;
+            expired: number;
+            byType: Record<string, number>;
+            bySeverity: Record<number, number>;
         };
     }>;
     findOne(id: string): Promise<{
         app: string;
-        data: any;
+        data: {
+            area: {
+                type: string;
+                coordinates: number[][][];
+            };
+            translations: string | number | true | import("@prisma/client/runtime/library").JsonObject | import("@prisma/client/runtime/library").JsonArray;
+            status: string;
+            issuer: {
+                role: import(".prisma/client").$Enums.Role;
+                name: string | null;
+                id: string;
+            };
+            type: string;
+            id: string;
+            createdAt: Date;
+            message: string;
+            severity: number;
+            validFrom: Date;
+            validTo: Date;
+            issuerId: string;
+            sourceRole: import(".prisma/client").$Enums.Role;
+            message_i18n: import("@prisma/client/runtime/library").JsonValue | null;
+        };
     }>;
     update(id: string, dto: Partial<CreateWarningDto>, req: any): Promise<{
         app: string;
-        data: any;
+        data: {
+            area: any;
+            translations: string | number | true | import("@prisma/client/runtime/library").JsonObject | import("@prisma/client/runtime/library").JsonArray;
+            status: string;
+            issuer: {
+                role: import(".prisma/client").$Enums.Role;
+                name: string | null;
+                id: string;
+            };
+            type: string;
+            id: string;
+            createdAt: Date;
+            message: string;
+            severity: number;
+            validFrom: Date;
+            validTo: Date;
+            issuerId: string;
+            sourceRole: import(".prisma/client").$Enums.Role;
+            message_i18n: import("@prisma/client/runtime/library").JsonValue | null;
+        };
     }>;
     remove(id: string, req: any): Promise<{
         app: string;

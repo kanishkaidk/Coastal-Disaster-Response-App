@@ -33,6 +33,7 @@ model User {
   warningsIssued Warning[]
   forumComments  ForumComment[]
   forumReactions ForumReaction[]
+  marineWorker  MarineWorker?
 }
 
 model Report {
@@ -169,6 +170,31 @@ model EducationalResource {
   content_i18n Json?
   mediaUrl   String?
   createdAt  DateTime @default(now())
+}
+
+model MarineWorker {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  name        String
+  phone       String
+  isVerified  Boolean  @default(false)
+  workToday   String?
+  observations String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  warnings    MarineWorkerWarning[]
+}
+
+model MarineWorkerWarning {
+  id              String      @id @default(cuid())
+  marineWorkerId  String
+  marineWorker    MarineWorker @relation(fields: [marineWorkerId], references: [id])
+  description     String
+  severity        Int         @default(1) // 1-5
+  location        Unsupported("geometry(Point,4326)")?
+  createdAt       DateTime    @default(now())
 }
 
 // Indexes for geospatial queries (created via raw SQL migrations typically)

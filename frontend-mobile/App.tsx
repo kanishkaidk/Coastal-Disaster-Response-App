@@ -12,10 +12,17 @@ import { I18nextProvider } from 'react-i18next';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 
+// Import Intl polyfill for better compatibility
+import 'intl-pluralrules';
+
 // Screens
 import LandingScreen from './src/screens/LandingScreen';
 import AuthScreen from './src/screens/AuthScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import RoleSelectionScreen from './src/screens/RoleSelectionScreen';
+import MarineWorkerVerificationScreen from './src/screens/MarineWorkerVerificationScreen';
+import MarineWorkerWorkScreen from './src/screens/MarineWorkerWorkScreen';
+import MarineWorkerWarningScreen from './src/screens/MarineWorkerWarningScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import MapScreen from './src/screens/MapScreen';
 import ReportScreen from './src/screens/ReportScreen';
@@ -48,6 +55,10 @@ function AuthStack() {
       <Stack.Screen name="Landing" component={LandingScreen} />
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Auth" component={AuthScreen} />
+      <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
+      <Stack.Screen name="MarineWorkerVerification" component={MarineWorkerVerificationScreen} />
+      <Stack.Screen name="MarineWorkerWork" component={MarineWorkerWorkScreen} />
+      <Stack.Screen name="MarineWorkerWarning" component={MarineWorkerWarningScreen} />
     </Stack.Navigator>
   );
 }
@@ -56,15 +67,26 @@ function AuthenticatedStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+      <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
+      <Stack.Screen name="MarineWorkerVerification" component={MarineWorkerVerificationScreen} />
+      <Stack.Screen name="MarineWorkerWork" component={MarineWorkerWorkScreen} />
+      <Stack.Screen name="MarineWorkerWarning" component={MarineWorkerWarningScreen} />
       <Stack.Screen name="MainTabs" component={MainTabs} />
       <Stack.Screen name="SOS" component={SOSScreen} />
     </Stack.Navigator>
   );
 }
 
-function MainStack() {
+function MainStack({ initialRoute = 'MainTabs' }) {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator 
+      initialRouteName={initialRoute}
+      screenOptions={{ headerShown: false }}
+    >
+      <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
+      <Stack.Screen name="MarineWorkerVerification" component={MarineWorkerVerificationScreen} />
+      <Stack.Screen name="MarineWorkerWork" component={MarineWorkerWorkScreen} />
+      <Stack.Screen name="MarineWorkerWarning" component={MarineWorkerWarningScreen} />
       <Stack.Screen name="MainTabs" component={MainTabs} />
       <Stack.Screen name="SOS" component={SOSScreen} />
     </Stack.Navigator>
@@ -153,13 +175,13 @@ function AppContent() {
     initializeAccessibility();
   }, []);
 
-  // Check if user needs onboarding (no language or role set)
-  const needsOnboarding = isAuthenticated && (!user?.language || !user?.role);
+  // Check if user needs role selection (authenticated but no role set)
+  const needsRoleSelection = isAuthenticated && !user?.role;
 
   return (
     <NavigationContainer>
       {isAuthenticated ? (
-        needsOnboarding ? <AuthenticatedStack /> : <MainStack />
+        <MainStack initialRoute={needsRoleSelection ? 'RoleSelection' : 'MainTabs'} />
       ) : (
         <AuthStack />
       )}

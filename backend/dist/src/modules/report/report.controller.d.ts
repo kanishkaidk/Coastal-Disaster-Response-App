@@ -5,7 +5,7 @@ export declare class ReportController {
     constructor(reports: ReportService);
     create(req: any, dto: CreateReportDto): Promise<{
         app: string;
-        result: any;
+        result: number;
     }>;
     nearby(lat: string, lng: string): Promise<{
         app: string;

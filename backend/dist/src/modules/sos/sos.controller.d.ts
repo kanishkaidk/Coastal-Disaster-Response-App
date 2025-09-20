@@ -5,28 +5,71 @@ export declare class SosController {
     constructor(sosService: SosService);
     create(req: any, dto: CreateSosDto): Promise<{
         app: string;
-        data: any;
+        data: {
+            deliveryStatus: {
+                delivered: boolean;
+                channel: string;
+                attempts: Array<{
+                    method: string;
+                    success: boolean;
+                    error?: string;
+                }>;
+            };
+            id: string;
+            createdAt: Date;
+            userId: string;
+            message: string | null;
+            delivered: boolean;
+            channel: string;
+        };
     }>;
     findAll(limit?: string, offset?: string, req?: any): Promise<{
         app: string;
-        data: any;
+        data: ({
+            user: {
+                role: import(".prisma/client").$Enums.Role;
+                name: string | null;
+                id: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            userId: string;
+            message: string | null;
+            delivered: boolean;
+            channel: string;
+        })[];
     }>;
     getNearby(lat: string, lng: string, radius?: string): Promise<{
         app: string;
-        data: any;
+        data: unknown;
     }>;
     getStats(): Promise<{
         app: string;
         data: {
-            total: any;
-            delivered: any;
-            pending: any;
+            total: number;
+            delivered: number;
+            pending: number;
             deliveryRate: number;
-            byChannel: any;
+            byChannel: Record<string, number>;
         };
     }>;
     findOne(id: string): Promise<{
         app: string;
-        data: any;
+        data: {
+            user: {
+                role: import(".prisma/client").$Enums.Role;
+                phone: string;
+                name: string | null;
+                id: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            userId: string;
+            message: string | null;
+            delivered: boolean;
+            channel: string;
+        };
     }>;
 }

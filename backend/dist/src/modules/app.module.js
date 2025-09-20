@@ -19,6 +19,7 @@ const queue_module_1 = require("./queue/queue.module");
 const forum_module_1 = require("./forum/forum.module");
 const sos_module_1 = require("./sos/sos.module");
 const warning_module_1 = require("./warning/warning.module");
+const marine_worker_module_1 = require("./marine-worker/marine-worker.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -36,6 +37,7 @@ exports.AppModule = AppModule = __decorate([
             forum_module_1.ForumModule,
             sos_module_1.SosModule,
             warning_module_1.WarningModule,
+            marine_worker_module_1.MarineWorkerModule,
         ],
     })
 ], AppModule);

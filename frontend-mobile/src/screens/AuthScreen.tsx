@@ -77,8 +77,8 @@ const AuthScreen: React.FC = () => {
     
     try {
       await login(phone, otp);
-      setStep('role');
-      speak(t('selectRole'), { priority: 'high' });
+      // Navigate to role selection screen
+      navigation.navigate('RoleSelection' as never);
     } catch (error) {
       speak('OTP verification failed. Please try again.', { priority: 'high' });
     }
@@ -91,6 +91,15 @@ const AuthScreen: React.FC = () => {
     
     // Update user role immediately
     updateUser({ role });
+    
+    // If marine worker is selected, navigate to verification screen
+    if (role === 'marine_worker') {
+      navigation.navigate('MarineWorkerVerification' as never);
+    } else {
+      // For citizens, navigate directly to main tabs
+      navigation.navigate('MainTabs' as never);
+      speak('Welcome to the app!', { priority: 'high' });
+    }
   };
 
   const handleContinue = () => {
