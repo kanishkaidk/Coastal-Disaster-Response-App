@@ -77,9 +77,8 @@ const AuthScreen: React.FC = () => {
     
     try {
       await login(phone, otp);
-      // Show role selection step instead of navigating
-      setStep('role');
-      speak(t('selectRole'), { priority: 'high' });
+      // Navigate to role selection screen
+      navigation.navigate('RoleSelection' as never);
     } catch (error) {
       speak('OTP verification failed. Please try again.', { priority: 'high' });
     }
