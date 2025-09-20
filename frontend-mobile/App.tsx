@@ -77,9 +77,16 @@ function AuthenticatedStack() {
   );
 }
 
-function MainStack() {
+function MainStack({ initialRoute = 'MainTabs' }) {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator 
+      initialRouteName={initialRoute}
+      screenOptions={{ headerShown: false }}
+    >
+      <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
+      <Stack.Screen name="MarineWorkerVerification" component={MarineWorkerVerificationScreen} />
+      <Stack.Screen name="MarineWorkerWork" component={MarineWorkerWorkScreen} />
+      <Stack.Screen name="MarineWorkerWarning" component={MarineWorkerWarningScreen} />
       <Stack.Screen name="MainTabs" component={MainTabs} />
       <Stack.Screen name="SOS" component={SOSScreen} />
     </Stack.Navigator>
@@ -174,7 +181,7 @@ function AppContent() {
   return (
     <NavigationContainer>
       {isAuthenticated ? (
-        needsRoleSelection ? <AuthStack /> : <MainStack />
+        <MainStack initialRoute={needsRoleSelection ? 'RoleSelection' : 'MainTabs'} />
       ) : (
         <AuthStack />
       )}
