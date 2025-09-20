@@ -16,7 +16,6 @@ import {
   Platform,
   Modal
 } from 'react-native';
-// Note: DateTimePickerAndroid is part of React Native core on Android
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -67,6 +66,18 @@ const ReportScreen: React.FC = () => {
   const [manualLatitude, setManualLatitude] = useState<string>('');
   const [manualLongitude, setManualLongitude] = useState<string>('');
   const [manualAddress, setManualAddress] = useState<string>('');
+  const [locationSearchQuery, setLocationSearchQuery] = useState<string>('');
+  const [locationSearchResults, setLocationSearchResults] = useState<any[]>([]);
+  const [showLocationSearch, setShowLocationSearch] = useState<boolean>(false);
+  
+  // Dynamic hazard-specific fields
+  const [hazardSpecificData, setHazardSpecificData] = useState<{[key: string]: any}>({});
+  
+  // Emergency assistance features
+  const [needsImmediateAssistance, setNeedsImmediateAssistance] = useState<boolean>(false);
+  const [emergencyNeeds, setEmergencyNeeds] = useState<string[]>([]);
+  const [specificNeeds, setSpecificNeeds] = useState<string>('');
+  const [groupSize, setGroupSize] = useState<string>('');
   
   // Time picker features
   const [hazardTime, setHazardTime] = useState<Date>(new Date());
@@ -76,6 +87,7 @@ const ReportScreen: React.FC = () => {
   // Form validation state
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [touched, setTouched] = useState<{[key: string]: boolean}>({});
+  const [fieldValidations, setFieldValidations] = useState<{[key: string]: boolean}>({});
   
   // Animation refs
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -97,6 +109,15 @@ const ReportScreen: React.FC = () => {
     { id: 'medium', label: 'Medium', color: '#f59e0b', description: 'Moderate impact, take precautions' },
     { id: 'high', label: 'High', color: '#f97316', description: 'Significant impact, immediate action needed' },
     { id: 'critical', label: 'Critical', color: '#dc2626', description: 'Severe impact, emergency response required' },
+  ];
+
+  const emergencyNeedsOptions = [
+    { id: 'water', label: 'Water', icon: 'water', color: '#3b82f6', description: 'Clean drinking water' },
+    { id: 'food', label: 'Food', icon: 'restaurant', color: '#f59e0b', description: 'Emergency food supplies' },
+    { id: 'medical', label: 'Medical Aid', icon: 'medical', color: '#ef4444', description: 'Medical assistance or supplies' },
+    { id: 'shelter', label: 'Shelter', icon: 'home', color: '#8b5cf6', description: 'Safe shelter or evacuation' },
+    { id: 'transport', label: 'Transportation', icon: 'car', color: '#10b981', description: 'Emergency transportation' },
+    { id: 'communication', label: 'Communication', icon: 'call', color: '#06b6d4', description: 'Communication with family/emergency services' },
   ];
 
   useEffect(() => {
@@ -166,6 +187,7 @@ const ReportScreen: React.FC = () => {
   // Form validation
   const validateField = (field: string, value: string) => {
     let error = '';
+    let isValid = false;
     
     switch (field) {
       case 'title':
@@ -173,6 +195,8 @@ const ReportScreen: React.FC = () => {
           error = 'Title is required';
         } else if (value.trim().length < 5) {
           error = 'Title must be at least 5 characters';
+        } else {
+          isValid = true;
         }
         break;
       case 'description':
@@ -180,16 +204,21 @@ const ReportScreen: React.FC = () => {
           error = 'Description is required';
         } else if (value.trim().length < 20) {
           error = 'Description must be at least 20 characters';
+        } else {
+          isValid = true;
         }
         break;
       case 'hazardType':
         if (!value) {
           error = 'Please select a hazard type';
+        } else {
+          isValid = true;
         }
         break;
     }
     
     setErrors(prev => ({ ...prev, [field]: error }));
+    setFieldValidations(prev => ({ ...prev, [field]: isValid }));
     return error === '';
   };
 
@@ -311,6 +340,130 @@ const ReportScreen: React.FC = () => {
     setShowHazardTypes(false);
     const selectedType = hazardTypes.find(t => t.id === type);
     speak(`Selected ${selectedType?.label}`);
+    
+    // Reset hazard-specific data when changing hazard type
+    setHazardSpecificData({});
+  };
+
+  // Dynamic hazard-specific field handlers
+  const updateHazardSpecificData = (field: string, value: any) => {
+    setHazardSpecificData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Get hazard-specific fields based on selected hazard type
+  const getHazardSpecificFields = () => {
+    switch (hazardType) {
+      case 'infrastructure':
+        return {
+          structureType: {
+            label: 'Type of Structure',
+            type: 'select',
+            options: [
+              { id: 'bridge', label: 'Bridge' },
+              { id: 'road', label: 'Road' },
+              { id: 'dam', label: 'Dam' },
+              { id: 'building', label: 'Building' },
+              { id: 'pier', label: 'Pier' },
+              { id: 'other', label: 'Other' }
+            ]
+          },
+          damageExtent: {
+            label: 'Extent of Damage',
+            type: 'select',
+            options: [
+              { id: 'minor', label: 'Minor - Surface cracks' },
+              { id: 'moderate', label: 'Moderate - Structural damage' },
+              { id: 'severe', label: 'Severe - Partial collapse' },
+              { id: 'critical', label: 'Critical - Complete failure' }
+            ]
+          }
+        };
+      case 'pollution':
+        return {
+          pollutantType: {
+            label: 'Pollutant Type',
+            type: 'select',
+            options: [
+              { id: 'oil', label: 'Oil Spill' },
+              { id: 'chemical', label: 'Chemical Contamination' },
+              { id: 'sewage', label: 'Sewage Discharge' },
+              { id: 'plastic', label: 'Plastic Waste' },
+              { id: 'other', label: 'Other' }
+            ]
+          },
+          pollutionSource: {
+            label: 'Source of Pollution',
+            type: 'text',
+            placeholder: 'Describe the source of pollution...'
+          }
+        };
+      case 'flood':
+        return {
+          waterLevel: {
+            label: 'Water Level',
+            type: 'select',
+            options: [
+              { id: 'low', label: 'Low - Ankle deep' },
+              { id: 'medium', label: 'Medium - Knee deep' },
+              { id: 'high', label: 'High - Waist deep' },
+              { id: 'extreme', label: 'Extreme - Above waist' }
+            ]
+          },
+          floodDuration: {
+            label: 'Flood Duration',
+            type: 'select',
+            options: [
+              { id: 'minutes', label: 'Minutes' },
+              { id: 'hours', label: 'Hours' },
+              { id: 'days', label: 'Days' },
+              { id: 'ongoing', label: 'Ongoing' }
+            ]
+          }
+        };
+      case 'storm':
+        return {
+          windSpeed: {
+            label: 'Wind Speed',
+            type: 'select',
+            options: [
+              { id: 'light', label: 'Light - 0-25 mph' },
+              { id: 'moderate', label: 'Moderate - 25-50 mph' },
+              { id: 'strong', label: 'Strong - 50-75 mph' },
+              { id: 'severe', label: 'Severe - 75+ mph' }
+            ]
+          },
+          stormType: {
+            label: 'Storm Type',
+            type: 'select',
+            options: [
+              { id: 'thunderstorm', label: 'Thunderstorm' },
+              { id: 'hurricane', label: 'Hurricane' },
+              { id: 'tornado', label: 'Tornado' },
+              { id: 'other', label: 'Other' }
+            ]
+          }
+        };
+      case 'erosion':
+        return {
+          erosionRate: {
+            label: 'Erosion Rate',
+            type: 'select',
+            options: [
+              { id: 'slow', label: 'Slow - Gradual' },
+              { id: 'moderate', label: 'Moderate - Noticeable' },
+              { id: 'rapid', label: 'Rapid - Significant' },
+              { id: 'severe', label: 'Severe - Critical' }
+            ]
+          },
+          affectedArea: {
+            label: 'Affected Area Size',
+            type: 'text',
+            placeholder: 'Describe the size of affected area...'
+          }
+        };
+      default:
+        return {};
+    }
   };
 
   const selectSeverity = (level: string) => {
@@ -355,6 +508,11 @@ const ReportScreen: React.FC = () => {
           type: m.type,
           base64: m.base64
         })),
+        hazardSpecificData: hazardSpecificData,
+        needsImmediateAssistance: needsImmediateAssistance,
+        emergencyNeeds: emergencyNeeds,
+        specificNeeds: specificNeeds,
+        groupSize: groupSize,
         userId: user?.id,
       };
 
@@ -396,10 +554,18 @@ const ReportScreen: React.FC = () => {
               setManualLatitude('');
               setManualLongitude('');
               setManualAddress('');
+              setLocationSearchQuery('');
+              setLocationSearchResults([]);
               setHazardTime(new Date());
               setIsRealTimeReport(true);
+              setHazardSpecificData({});
+              setNeedsImmediateAssistance(false);
+              setEmergencyNeeds([]);
+              setSpecificNeeds('');
+              setGroupSize('');
               setErrors({});
               setTouched({});
+              setFieldValidations({});
             }
           }
         ]
@@ -424,41 +590,102 @@ const ReportScreen: React.FC = () => {
     return severityLevels.find(s => s.id === severity);
   };
 
+  // Time picker state
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [tempDate, setTempDate] = useState(new Date());
+  const [tempTime, setTempTime] = useState(new Date());
+
   // Time picker functions
   const showDateTimePicker = () => {
     setShowTimePickerModal(true);
   };
 
-  const handleDateChange = (event: any, selectedDate?: Date) => {
-    if (selectedDate) {
-      setHazardTime(selectedDate);
-      setIsRealTimeReport(false);
-    }
-    setShowTimePickerModal(false);
+  const openDatePicker = () => {
+    setTempDate(hazardTime);
+    setShowDatePicker(true);
   };
 
-  const showDatePicker = () => {
-    if (Platform.OS === 'android') {
-      const DateTimePicker = require('@react-native-community/datetimepicker').default;
-      DateTimePicker.open({
-        value: hazardTime,
-        mode: 'date',
-        is24Hour: true,
-        onChange: handleDateChange,
-      });
-    }
+  const openTimePicker = () => {
+    setTempTime(hazardTime);
+    setShowTimePicker(true);
   };
 
-  const showTimePicker = () => {
-    if (Platform.OS === 'android') {
-      const DateTimePicker = require('@react-native-community/datetimepicker').default;
-      DateTimePicker.open({
-        value: hazardTime,
-        mode: 'time',
-        is24Hour: true,
-        onChange: handleDateChange,
-      });
+  const confirmDateChange = () => {
+    const newDate = new Date(hazardTime);
+    newDate.setFullYear(tempDate.getFullYear());
+    newDate.setMonth(tempDate.getMonth());
+    newDate.setDate(tempDate.getDate());
+    setHazardTime(newDate);
+    setIsRealTimeReport(false);
+    setShowDatePicker(false);
+  };
+
+  const confirmTimeChange = () => {
+    const newDate = new Date(hazardTime);
+    newDate.setHours(tempTime.getHours());
+    newDate.setMinutes(tempTime.getMinutes());
+    setHazardTime(newDate);
+    setIsRealTimeReport(false);
+    setShowTimePicker(false);
+  };
+
+  const incrementDate = (field: 'year' | 'month' | 'day') => {
+    const newDate = new Date(tempDate);
+    switch (field) {
+      case 'year':
+        newDate.setFullYear(newDate.getFullYear() + 1);
+        break;
+      case 'month':
+        newDate.setMonth(newDate.getMonth() + 1);
+        break;
+      case 'day':
+        newDate.setDate(newDate.getDate() + 1);
+        break;
     }
+    setTempDate(newDate);
+  };
+
+  const decrementDate = (field: 'year' | 'month' | 'day') => {
+    const newDate = new Date(tempDate);
+    switch (field) {
+      case 'year':
+        newDate.setFullYear(newDate.getFullYear() - 1);
+        break;
+      case 'month':
+        newDate.setMonth(newDate.getMonth() - 1);
+        break;
+      case 'day':
+        newDate.setDate(newDate.getDate() - 1);
+        break;
+    }
+    setTempDate(newDate);
+  };
+
+  const incrementTime = (field: 'hour' | 'minute') => {
+    const newTime = new Date(tempTime);
+    switch (field) {
+      case 'hour':
+        newTime.setHours(newTime.getHours() + 1);
+        break;
+      case 'minute':
+        newTime.setMinutes(newTime.getMinutes() + 15);
+        break;
+    }
+    setTempTime(newTime);
+  };
+
+  const decrementTime = (field: 'hour' | 'minute') => {
+    const newTime = new Date(tempTime);
+    switch (field) {
+      case 'hour':
+        newTime.setHours(newTime.getHours() - 1);
+        break;
+      case 'minute':
+        newTime.setMinutes(newTime.getMinutes() - 15);
+        break;
+    }
+    setTempTime(newTime);
   };
 
   const getAccuracyColor = (accuracy: 'high' | 'medium' | 'low') => {
@@ -555,6 +782,73 @@ const ReportScreen: React.FC = () => {
     setManualLatitude('');
     setManualLongitude('');
     setManualAddress('');
+  };
+
+  // Location search functionality
+  const searchLocation = async (query: string) => {
+    if (query.length < 3) {
+      setLocationSearchResults([]);
+      return;
+    }
+    
+    try {
+      // Simulate location search - in a real app, you'd use a geocoding service
+      const mockResults = [
+        { name: `${query} - Main Street`, address: `${query}, City, State`, lat: 19.0760, lng: 72.8777 },
+        { name: `${query} - Park Area`, address: `${query} Park, City, State`, lat: 19.0761, lng: 72.8778 },
+        { name: `${query} - Beach`, address: `${query} Beach, City, State`, lat: 19.0762, lng: 72.8779 },
+      ];
+      
+      setLocationSearchResults(mockResults);
+    } catch (error) {
+      console.error('Error searching location:', error);
+      setLocationSearchResults([]);
+    }
+  };
+
+  const selectLocationFromSearch = (result: any) => {
+    setLocation({ latitude: result.lat, longitude: result.lng });
+    setAddress(result.address);
+    setLocationSearchQuery(result.name);
+    setLocationSearchResults([]);
+    setShowLocationSearch(false);
+    setIsManualLocation(true);
+    setLocationAccuracy('high');
+    speak('Location selected from search');
+  };
+
+  // Emergency assistance handlers
+  const toggleEmergencyAssistance = () => {
+    const newValue = !needsImmediateAssistance;
+    setNeedsImmediateAssistance(newValue);
+    hapticFeedback('medium');
+    
+    if (newValue) {
+      speak('Emergency assistance activated. Please specify your needs.');
+      // Auto-set severity to critical when emergency assistance is needed
+      setSeverity('critical');
+    } else {
+      speak('Emergency assistance deactivated.');
+      // Clear emergency data when toggled off
+      setEmergencyNeeds([]);
+      setSpecificNeeds('');
+      setGroupSize('');
+    }
+  };
+
+  const toggleEmergencyNeed = (needId: string) => {
+    hapticFeedback('light');
+    setEmergencyNeeds(prev => {
+      if (prev.includes(needId)) {
+        return prev.filter(id => id !== needId);
+      } else {
+        return [...prev, needId];
+      }
+    });
+  };
+
+  const getSelectedEmergencyNeeds = () => {
+    return emergencyNeedsOptions.filter(option => emergencyNeeds.includes(option.id));
   };
 
   return (
@@ -780,7 +1074,8 @@ const ReportScreen: React.FC = () => {
                   style={[
                     styles.input,
                     errors.title && touched.title && styles.inputError,
-                    title.length > 0 && styles.inputFocused
+                    title.length > 0 && styles.inputFocused,
+                    fieldValidations.title && styles.inputValid
                   ]}
                   value={title}
                   onChangeText={(value) => handleFieldChange('title', value)}
@@ -790,11 +1085,19 @@ const ReportScreen: React.FC = () => {
                   accessibilityLabel="Hazard title input"
                 />
                 <View style={styles.inputIcon}>
-                  <Ionicons 
-                    name="create-outline" 
-                    size={16} 
-                    color={title.length > 0 ? colors.primary : colors.gray400} 
-                  />
+                  {fieldValidations.title ? (
+                    <Ionicons 
+                      name="checkmark-circle" 
+                      size={16} 
+                      color={colors.success} 
+                    />
+                  ) : (
+                    <Ionicons 
+                      name="create-outline" 
+                      size={16} 
+                      color={title.length > 0 ? colors.primary : colors.gray400} 
+                    />
+                  )}
                 </View>
               </View>
               {errors.title && touched.title && (
@@ -809,22 +1112,40 @@ const ReportScreen: React.FC = () => {
                 <Text style={styles.cardTitle}>Description</Text>
                 <Text style={styles.required}>*</Text>
               </View>
-              <TextInput
-                style={[
-                  styles.input,
-                  styles.textArea,
-                  errors.description && touched.description && styles.inputError
-                ]}
-                value={description}
-                onChangeText={(value) => handleFieldChange('description', value)}
-                placeholder="Provide detailed information about the hazard..."
-                placeholderTextColor={colors.gray400}
-                multiline
-                numberOfLines={4}
-                textAlignVertical="top"
-                accessible={true}
-                accessibilityLabel="Hazard description input"
-              />
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={[
+                    styles.input,
+                    styles.textArea,
+                    errors.description && touched.description && styles.inputError,
+                    fieldValidations.description && styles.inputValid
+                  ]}
+                  value={description}
+                  onChangeText={(value) => handleFieldChange('description', value)}
+                  placeholder="Provide detailed information about the hazard..."
+                  placeholderTextColor={colors.gray400}
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                  accessible={true}
+                  accessibilityLabel="Hazard description input"
+                />
+                <View style={[styles.inputIcon, styles.textAreaIcon]}>
+                  {fieldValidations.description ? (
+                    <Ionicons 
+                      name="checkmark-circle" 
+                      size={16} 
+                      color={colors.success} 
+                    />
+                  ) : (
+                    <Ionicons 
+                      name="document-text-outline" 
+                      size={16} 
+                      color={description.length > 0 ? colors.primary : colors.gray400} 
+                    />
+                  )}
+                </View>
+              </View>
               {errors.description && touched.description && (
                 <Text style={styles.errorText}>{errors.description}</Text>
               )}
@@ -843,7 +1164,8 @@ const ReportScreen: React.FC = () => {
               <TouchableOpacity
                 style={[
                   styles.selector,
-                  errors.hazardType && touched.hazardType && styles.inputError
+                  errors.hazardType && touched.hazardType && styles.inputError,
+                  fieldValidations.hazardType && styles.selectorValid
                 ]}
                 onPress={() => {
                   setShowHazardTypes(!showHazardTypes);
@@ -866,7 +1188,17 @@ const ReportScreen: React.FC = () => {
                   ) : (
                     <Text style={styles.placeholderText}>Select hazard type</Text>
                   )}
-                  <Ionicons name="chevron-down" size={20} color={colors.gray500} />
+                  <View style={styles.selectorRight}>
+                    {fieldValidations.hazardType && (
+                      <Ionicons 
+                        name="checkmark-circle" 
+                        size={16} 
+                        color={colors.success} 
+                        style={styles.selectorCheckmark}
+                      />
+                    )}
+                    <Ionicons name="chevron-down" size={20} color={colors.gray500} />
+                  </View>
                 </View>
               </TouchableOpacity>
               {errors.hazardType && touched.hazardType && (
@@ -901,6 +1233,58 @@ const ReportScreen: React.FC = () => {
                 </View>
               )}
             </View>
+
+            {/* Dynamic Hazard-Specific Fields */}
+            {hazardType && Object.keys(getHazardSpecificFields()).length > 0 && (
+              <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <Ionicons name="settings" size={20} color={colors.primary} />
+                  <Text style={styles.cardTitle}>Additional Details</Text>
+                  <Text style={styles.optional}>(Optional)</Text>
+                </View>
+                
+                {Object.entries(getHazardSpecificFields()).map(([fieldKey, fieldConfig]) => (
+                  <View key={fieldKey} style={styles.hazardSpecificField}>
+                    <Text style={styles.hazardSpecificLabel}>{fieldConfig.label}</Text>
+                    
+                    {fieldConfig.type === 'select' ? (
+                      <TouchableOpacity
+                        style={styles.hazardSpecificSelector}
+                        onPress={() => {
+                          // Handle select field - you can implement a modal or dropdown
+                          Alert.alert(
+                            fieldConfig.label,
+                            'Select an option:',
+                            fieldConfig.options.map((option: any) => ({
+                              text: option.label,
+                              onPress: () => updateHazardSpecificData(fieldKey, option.id)
+                            }))
+                          );
+                        }}
+                      >
+                        <Text style={styles.hazardSpecificSelectorText}>
+                          {hazardSpecificData[fieldKey] 
+                            ? fieldConfig.options.find((opt: any) => opt.id === hazardSpecificData[fieldKey])?.label
+                            : 'Select...'
+                          }
+                        </Text>
+                        <Ionicons name="chevron-down" size={16} color={colors.gray500} />
+                      </TouchableOpacity>
+                    ) : (
+                      <TextInput
+                        style={styles.hazardSpecificInput}
+                        value={hazardSpecificData[fieldKey] || ''}
+                        onChangeText={(value) => updateHazardSpecificData(fieldKey, value)}
+                        placeholder={fieldConfig.placeholder}
+                        placeholderTextColor={colors.gray400}
+                        multiline={fieldConfig.type === 'textarea'}
+                        numberOfLines={fieldConfig.type === 'textarea' ? 3 : 1}
+                      />
+                    )}
+                  </View>
+                ))}
+              </View>
+            )}
 
             {/* Severity */}
             <View style={styles.card}>
@@ -1153,6 +1537,156 @@ const ReportScreen: React.FC = () => {
               </View>
             </View>
 
+            {/* Emergency Assistance Toggle */}
+            <View style={styles.card}>
+              <View style={styles.cardHeader}>
+                <Ionicons name="alert-circle" size={20} color={colors.emergency} />
+                <Text style={styles.cardTitle}>Emergency Assistance</Text>
+                <Text style={styles.optional}>(Optional)</Text>
+              </View>
+              
+              <TouchableOpacity
+                style={[
+                  styles.emergencyToggle,
+                  needsImmediateAssistance && styles.emergencyToggleActive
+                ]}
+                onPress={toggleEmergencyAssistance}
+                accessible={true}
+                accessibilityLabel="Toggle emergency assistance"
+                accessibilityRole="switch"
+                accessibilityState={{ checked: needsImmediateAssistance }}
+              >
+                <View style={styles.emergencyToggleContent}>
+                  <View style={styles.emergencyToggleLeft}>
+                    <View style={[
+                      styles.emergencyToggleIcon,
+                      { backgroundColor: needsImmediateAssistance ? colors.emergency : colors.gray300 }
+                    ]}>
+                      <Ionicons 
+                        name={needsImmediateAssistance ? "warning" : "shield-checkmark"} 
+                        size={20} 
+                        color="white" 
+                      />
+                    </View>
+                    <View style={styles.emergencyToggleText}>
+                      <Text style={[
+                        styles.emergencyToggleTitle,
+                        needsImmediateAssistance && styles.emergencyToggleTitleActive
+                      ]}>
+                        I am in immediate need of assistance
+                      </Text>
+                      <Text style={styles.emergencyToggleDescription}>
+                        {needsImmediateAssistance 
+                          ? 'Emergency services will be notified immediately'
+                          : 'Check this if you need immediate help'
+                        }
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={[
+                    styles.emergencyToggleSwitch,
+                    needsImmediateAssistance && styles.emergencyToggleSwitchActive
+                  ]}>
+                    <View style={[
+                      styles.emergencyToggleThumb,
+                      needsImmediateAssistance && styles.emergencyToggleThumbActive
+                    ]} />
+                  </View>
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            {/* Emergency Needs Fields - Dynamic */}
+            {needsImmediateAssistance && (
+              <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <Ionicons name="medical" size={20} color={colors.emergency} />
+                  <Text style={styles.cardTitle}>Emergency Needs</Text>
+                  <Text style={styles.required}>*</Text>
+                </View>
+                
+                <Text style={styles.emergencyNeedsDescription}>
+                  Please select all that apply to help emergency services understand your situation:
+                </Text>
+                
+                <View style={styles.emergencyNeedsGrid}>
+                  {emergencyNeedsOptions.map((option) => (
+                    <TouchableOpacity
+                      key={option.id}
+                      style={[
+                        styles.emergencyNeedItem,
+                        emergencyNeeds.includes(option.id) && styles.emergencyNeedItemSelected
+                      ]}
+                      onPress={() => toggleEmergencyNeed(option.id)}
+                      accessible={true}
+                      accessibilityLabel={`Select ${option.label} need`}
+                      accessibilityRole="checkbox"
+                      accessibilityState={{ checked: emergencyNeeds.includes(option.id) }}
+                    >
+                      <View style={styles.emergencyNeedContent}>
+                        <View style={[
+                          styles.emergencyNeedIcon,
+                          { backgroundColor: emergencyNeeds.includes(option.id) ? option.color : colors.gray200 }
+                        ]}>
+                          <Ionicons 
+                            name={option.icon as any} 
+                            size={20} 
+                            color={emergencyNeeds.includes(option.id) ? "white" : colors.gray600} 
+                          />
+                        </View>
+                        <View style={styles.emergencyNeedText}>
+                          <Text style={[
+                            styles.emergencyNeedLabel,
+                            emergencyNeeds.includes(option.id) && styles.emergencyNeedLabelSelected
+                          ]}>
+                            {option.label}
+                          </Text>
+                          <Text style={styles.emergencyNeedDescription}>
+                            {option.description}
+                          </Text>
+                        </View>
+                        {emergencyNeeds.includes(option.id) && (
+                          <Ionicons name="checkmark-circle" size={20} color={colors.success} />
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                
+                {/* Group Size */}
+                <View style={styles.emergencyField}>
+                  <Text style={styles.emergencyFieldLabel}>Number of people in your group</Text>
+                  <TextInput
+                    style={styles.emergencyFieldInput}
+                    value={groupSize}
+                    onChangeText={setGroupSize}
+                    placeholder="e.g., 3"
+                    placeholderTextColor={colors.gray400}
+                    keyboardType="numeric"
+                    accessible={true}
+                    accessibilityLabel="Number of people in group"
+                  />
+                </View>
+                
+                {/* Specific Needs */}
+                <View style={styles.emergencyField}>
+                  <Text style={styles.emergencyFieldLabel}>Specific needs or notes</Text>
+                  <TextInput
+                    style={[styles.emergencyFieldInput, styles.emergencyFieldTextArea]}
+                    value={specificNeeds}
+                    onChangeText={setSpecificNeeds}
+                    placeholder="e.g., 'Need first aid for an injured person' or 'Trapped in my vehicle'"
+                    placeholderTextColor={colors.gray400}
+                    multiline
+                    numberOfLines={3}
+                    textAlignVertical="top"
+                    accessible={true}
+                    accessibilityLabel="Specific emergency needs or notes"
+                  />
+                </View>
+              </View>
+            )}
+
             {/* Submit Button */}
             <Animated.View
               style={[
@@ -1180,9 +1714,11 @@ const ReportScreen: React.FC = () => {
                 <LinearGradient
                   colors={submitting 
                     ? [colors.gray400, colors.gray500] 
-                    : reportType === 'warning' 
+                    : needsImmediateAssistance
                       ? colors.gradients.emergency as any
-                      : colors.gradients.primary as any
+                      : reportType === 'warning' 
+                        ? colors.gradients.emergency as any
+                        : colors.gradients.primary as any
                   }
                   style={styles.submitButtonGradient}
                 >
@@ -1192,7 +1728,7 @@ const ReportScreen: React.FC = () => {
                     ) : (
                       <View style={styles.submitButtonIcon}>
                         <Ionicons 
-                          name={reportType === 'warning' ? 'warning' : 'send'} 
+                          name={needsImmediateAssistance ? 'medical' : (reportType === 'warning' ? 'warning' : 'send')} 
                           size={24} 
                           color="white" 
                         />
@@ -1201,14 +1737,16 @@ const ReportScreen: React.FC = () => {
                     <View style={styles.submitButtonTextContainer}>
                       <Text style={styles.submitButtonText}>
                         {submitting 
-                          ? (reportType === 'warning' ? 'Issuing Warning...' : 'Submitting...') 
-                          : (reportType === 'warning' ? 'Issue Warning' : 'Submit Report')
+                          ? (needsImmediateAssistance ? 'Requesting Emergency Help...' : (reportType === 'warning' ? 'Issuing Warning...' : 'Submitting...'))
+                          : (needsImmediateAssistance ? 'Request Emergency Help' : (reportType === 'warning' ? 'Issue Warning' : 'Submit Report'))
                         }
                       </Text>
                       <Text style={styles.submitButtonSubtext}>
                         {submitting 
                           ? 'Please wait...' 
-                          : 'Tap to submit your report'
+                          : needsImmediateAssistance 
+                            ? 'Emergency services will be notified immediately'
+                            : 'Tap to submit your report'
                         }
                       </Text>
                     </View>
@@ -1280,7 +1818,7 @@ const ReportScreen: React.FC = () => {
                     <View style={styles.timePickerButtons}>
                       <TouchableOpacity
                         style={styles.timePickerButton}
-                        onPress={showDatePicker}
+                        onPress={openDatePicker}
                       >
                         <Ionicons name="calendar" size={20} color={colors.primary} />
                         <Text style={styles.timePickerButtonText}>Select Date</Text>
@@ -1288,7 +1826,7 @@ const ReportScreen: React.FC = () => {
                       
                       <TouchableOpacity
                         style={styles.timePickerButton}
-                        onPress={showTimePicker}
+                        onPress={openTimePicker}
                       >
                         <Ionicons name="time" size={20} color={colors.primary} />
                         <Text style={styles.timePickerButtonText}>Select Time</Text>
@@ -1322,8 +1860,52 @@ const ReportScreen: React.FC = () => {
               
               <View style={styles.manualLocationContent}>
                 <Text style={styles.manualLocationDescription}>
-                  Enter the exact coordinates of the hazard location
+                  Search for a location or enter exact coordinates
                 </Text>
+                
+                {/* Location Search */}
+                <View style={styles.locationSearchContainer}>
+                  <Text style={styles.locationSearchLabel}>Search Location</Text>
+                  <View style={styles.locationSearchInputContainer}>
+                    <TextInput
+                      style={styles.locationSearchInput}
+                      value={locationSearchQuery}
+                      onChangeText={(value) => {
+                        setLocationSearchQuery(value);
+                        searchLocation(value);
+                      }}
+                      placeholder="Search for address, landmark, or place..."
+                      placeholderTextColor={colors.gray400}
+                      accessible={true}
+                      accessibilityLabel="Location search input"
+                    />
+                    <Ionicons name="search" size={20} color={colors.gray500} />
+                  </View>
+                  
+                  {locationSearchResults.length > 0 && (
+                    <View style={styles.locationSearchResults}>
+                      {locationSearchResults.map((result, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.locationSearchResult}
+                          onPress={() => selectLocationFromSearch(result)}
+                        >
+                          <Ionicons name="location" size={16} color={colors.primary} />
+                          <View style={styles.locationSearchResultText}>
+                            <Text style={styles.locationSearchResultName}>{result.name}</Text>
+                            <Text style={styles.locationSearchResultAddress}>{result.address}</Text>
+                          </View>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                </View>
+                
+                <View style={styles.coordinateDivider}>
+                  <View style={styles.dividerLine} />
+                  <Text style={styles.dividerText}>OR</Text>
+                  <View style={styles.dividerLine} />
+                </View>
                 
                 <View style={styles.coordinateInputs}>
                   <View style={styles.coordinateInputGroup}>
@@ -1386,6 +1968,191 @@ const ReportScreen: React.FC = () => {
                   >
                     <Ionicons name="checkmark" size={20} color="white" />
                     <Text style={styles.confirmButtonText}>Confirm Location</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
+        </Modal>
+        
+        {/* Custom Date Picker Modal */}
+        <Modal
+          visible={showDatePicker}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowDatePicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Select Date</Text>
+                <TouchableOpacity
+                  onPress={() => setShowDatePicker(false)}
+                  style={styles.modalCloseButton}
+                >
+                  <Ionicons name="close" size={24} color={colors.gray600} />
+                </TouchableOpacity>
+              </View>
+              
+              <View style={styles.customPickerContainer}>
+                <View style={styles.pickerRow}>
+                  <View style={styles.pickerColumn}>
+                    <Text style={styles.pickerLabel}>Year</Text>
+                    <View style={styles.pickerControls}>
+                      <TouchableOpacity
+                        style={styles.pickerButton}
+                        onPress={() => incrementDate('year')}
+                      >
+                        <Ionicons name="chevron-up" size={20} color={colors.primary} />
+                      </TouchableOpacity>
+                      <Text style={styles.pickerValue}>{tempDate.getFullYear()}</Text>
+                      <TouchableOpacity
+                        style={styles.pickerButton}
+                        onPress={() => decrementDate('year')}
+                      >
+                        <Ionicons name="chevron-down" size={20} color={colors.primary} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                  
+                  <View style={styles.pickerColumn}>
+                    <Text style={styles.pickerLabel}>Month</Text>
+                    <View style={styles.pickerControls}>
+                      <TouchableOpacity
+                        style={styles.pickerButton}
+                        onPress={() => incrementDate('month')}
+                      >
+                        <Ionicons name="chevron-up" size={20} color={colors.primary} />
+                      </TouchableOpacity>
+                      <Text style={styles.pickerValue}>{tempDate.getMonth() + 1}</Text>
+                      <TouchableOpacity
+                        style={styles.pickerButton}
+                        onPress={() => decrementDate('month')}
+                      >
+                        <Ionicons name="chevron-down" size={20} color={colors.primary} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                  
+                  <View style={styles.pickerColumn}>
+                    <Text style={styles.pickerLabel}>Day</Text>
+                    <View style={styles.pickerControls}>
+                      <TouchableOpacity
+                        style={styles.pickerButton}
+                        onPress={() => incrementDate('day')}
+                      >
+                        <Ionicons name="chevron-up" size={20} color={colors.primary} />
+                      </TouchableOpacity>
+                      <Text style={styles.pickerValue}>{tempDate.getDate()}</Text>
+                      <TouchableOpacity
+                        style={styles.pickerButton}
+                        onPress={() => decrementDate('day')}
+                      >
+                        <Ionicons name="chevron-down" size={20} color={colors.primary} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+                
+                <View style={styles.pickerActions}>
+                  <TouchableOpacity
+                    style={styles.cancelButton}
+                    onPress={() => setShowDatePicker(false)}
+                  >
+                    <Text style={styles.cancelButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    style={styles.confirmButton}
+                    onPress={confirmDateChange}
+                  >
+                    <Ionicons name="checkmark" size={20} color="white" />
+                    <Text style={styles.confirmButtonText}>Confirm</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
+        </Modal>
+        
+        {/* Custom Time Picker Modal */}
+        <Modal
+          visible={showTimePicker}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowTimePicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Select Time</Text>
+                <TouchableOpacity
+                  onPress={() => setShowTimePicker(false)}
+                  style={styles.modalCloseButton}
+                >
+                  <Ionicons name="close" size={24} color={colors.gray600} />
+                </TouchableOpacity>
+              </View>
+              
+              <View style={styles.customPickerContainer}>
+                <View style={styles.pickerRow}>
+                  <View style={styles.pickerColumn}>
+                    <Text style={styles.pickerLabel}>Hour</Text>
+                    <View style={styles.pickerControls}>
+                      <TouchableOpacity
+                        style={styles.pickerButton}
+                        onPress={() => incrementTime('hour')}
+                      >
+                        <Ionicons name="chevron-up" size={20} color={colors.primary} />
+                      </TouchableOpacity>
+                      <Text style={styles.pickerValue}>
+                        {tempTime.getHours().toString().padStart(2, '0')}
+                      </Text>
+                      <TouchableOpacity
+                        style={styles.pickerButton}
+                        onPress={() => decrementTime('hour')}
+                      >
+                        <Ionicons name="chevron-down" size={20} color={colors.primary} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                  
+                  <View style={styles.pickerColumn}>
+                    <Text style={styles.pickerLabel}>Minute</Text>
+                    <View style={styles.pickerControls}>
+                      <TouchableOpacity
+                        style={styles.pickerButton}
+                        onPress={() => incrementTime('minute')}
+                      >
+                        <Ionicons name="chevron-up" size={20} color={colors.primary} />
+                      </TouchableOpacity>
+                      <Text style={styles.pickerValue}>
+                        {tempTime.getMinutes().toString().padStart(2, '0')}
+                      </Text>
+                      <TouchableOpacity
+                        style={styles.pickerButton}
+                        onPress={() => decrementTime('minute')}
+                      >
+                        <Ionicons name="chevron-down" size={20} color={colors.primary} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+                
+                <View style={styles.pickerActions}>
+                  <TouchableOpacity
+                    style={styles.cancelButton}
+                    onPress={() => setShowTimePicker(false)}
+                  >
+                    <Text style={styles.cancelButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    style={styles.confirmButton}
+                    onPress={confirmTimeChange}
+                  >
+                    <Ionicons name="checkmark" size={20} color="white" />
+                    <Text style={styles.confirmButtonText}>Confirm</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -2099,6 +2866,342 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontFamily: typography.fontFamily.semiBold,
     color: 'white',
+  },
+  // Custom picker styles
+  customPickerContainer: {
+    padding: spacing.lg,
+  },
+  pickerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: spacing.lg,
+  },
+  pickerColumn: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  pickerLabel: {
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.medium,
+    color: colors.gray600,
+    marginBottom: spacing.sm,
+  },
+  pickerControls: {
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  pickerButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.gray200,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.sm,
+  },
+  pickerValue: {
+    fontSize: typography.fontSize.xl,
+    fontFamily: typography.fontFamily.bold,
+    color: colors.onSurface,
+    minWidth: 60,
+    textAlign: 'center',
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.background,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.gray200,
+  },
+  pickerActions: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginTop: spacing.md,
+  },
+  // Interactive feedback styles
+  inputValid: {
+    borderColor: colors.success,
+    borderWidth: 2,
+    shadowColor: colors.success,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  selectorValid: {
+    borderColor: colors.success,
+    borderWidth: 2,
+  },
+  selectorRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  selectorCheckmark: {
+    marginRight: spacing.xs,
+  },
+  textAreaIcon: {
+    top: spacing.sm,
+    right: spacing.md,
+  },
+  // Hazard-specific field styles
+  hazardSpecificField: {
+    marginBottom: spacing.md,
+  },
+  hazardSpecificLabel: {
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.medium,
+    color: colors.onSurface,
+    marginBottom: spacing.xs,
+  },
+  hazardSpecificSelector: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.gray200,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  hazardSpecificSelectorText: {
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.regular,
+    color: colors.onSurface,
+    flex: 1,
+  },
+  hazardSpecificInput: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.regular,
+    borderWidth: 1,
+    borderColor: colors.gray200,
+    color: colors.onSurface,
+    textAlignVertical: 'top',
+  },
+  // Location search styles
+  locationSearchContainer: {
+    marginBottom: spacing.lg,
+  },
+  locationSearchLabel: {
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.medium,
+    color: colors.onSurface,
+    marginBottom: spacing.xs,
+  },
+  locationSearchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.gray200,
+    paddingHorizontal: spacing.md,
+  },
+  locationSearchInput: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.regular,
+    color: colors.onSurface,
+  },
+  locationSearchResults: {
+    backgroundColor: colors.background,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.gray200,
+    marginTop: spacing.xs,
+    maxHeight: 200,
+    ...shadows.sm,
+  },
+  locationSearchResult: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray100,
+  },
+  locationSearchResultText: {
+    flex: 1,
+    marginLeft: spacing.sm,
+  },
+  locationSearchResultName: {
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.medium,
+    color: colors.onSurface,
+    marginBottom: spacing.xs,
+  },
+  locationSearchResultAddress: {
+    fontSize: typography.fontSize.sm,
+    color: colors.gray600,
+  },
+  coordinateDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: spacing.lg,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.gray300,
+  },
+  dividerText: {
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.medium,
+    color: colors.gray500,
+    marginHorizontal: spacing.md,
+  },
+  // Emergency assistance styles
+  emergencyToggle: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    borderWidth: 2,
+    borderColor: colors.gray200,
+    padding: spacing.md,
+  },
+  emergencyToggleActive: {
+    borderColor: colors.emergency,
+    backgroundColor: colors.emergency + '10',
+  },
+  emergencyToggleContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  emergencyToggleLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  emergencyToggleIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  emergencyToggleText: {
+    flex: 1,
+  },
+  emergencyToggleTitle: {
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.semiBold,
+    color: colors.onSurface,
+    marginBottom: spacing.xs,
+  },
+  emergencyToggleTitleActive: {
+    color: colors.emergency,
+  },
+  emergencyToggleDescription: {
+    fontSize: typography.fontSize.sm,
+    color: colors.gray600,
+    lineHeight: typography.lineHeight.normal * typography.fontSize.sm,
+  },
+  emergencyToggleSwitch: {
+    width: 50,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colors.gray300,
+    justifyContent: 'center',
+    paddingHorizontal: 2,
+  },
+  emergencyToggleSwitchActive: {
+    backgroundColor: colors.emergency,
+  },
+  emergencyToggleThumb: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  emergencyToggleThumbActive: {
+    transform: [{ translateX: 20 }],
+  },
+  emergencyNeedsDescription: {
+    fontSize: typography.fontSize.sm,
+    color: colors.gray600,
+    marginBottom: spacing.md,
+    lineHeight: typography.lineHeight.normal * typography.fontSize.sm,
+  },
+  emergencyNeedsGrid: {
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  emergencyNeedItem: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.gray200,
+    padding: spacing.md,
+  },
+  emergencyNeedItemSelected: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '10',
+  },
+  emergencyNeedContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  emergencyNeedIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  emergencyNeedText: {
+    flex: 1,
+  },
+  emergencyNeedLabel: {
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.medium,
+    color: colors.onSurface,
+    marginBottom: spacing.xs,
+  },
+  emergencyNeedLabelSelected: {
+    color: colors.primary,
+    fontFamily: typography.fontFamily.semiBold,
+  },
+  emergencyNeedDescription: {
+    fontSize: typography.fontSize.sm,
+    color: colors.gray600,
+    lineHeight: typography.lineHeight.normal * typography.fontSize.sm,
+  },
+  emergencyField: {
+    marginBottom: spacing.md,
+  },
+  emergencyFieldLabel: {
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.medium,
+    color: colors.onSurface,
+    marginBottom: spacing.xs,
+  },
+  emergencyFieldInput: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.regular,
+    borderWidth: 1,
+    borderColor: colors.gray200,
+    color: colors.onSurface,
+  },
+  emergencyFieldTextArea: {
+    height: 80,
+    textAlignVertical: 'top',
   },
 });
 
