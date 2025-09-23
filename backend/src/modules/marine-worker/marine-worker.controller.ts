@@ -16,7 +16,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { MarineWorkerService } from './marine-worker.service';
 import { CreateMarineWorkerDto } from './dto/create-marine-worker.dto';
 import { UpdateWorkDetailsDto } from './dto/update-work-details.dto';
-import { CreateWarningDto } from './dto/create-warning.dto';
+import { CreateMarineWorkerWarningDto } from './dto/create-warning.dto';
 
 @ApiTags('marine-worker')
 @Controller('marine-worker')
@@ -56,7 +56,7 @@ export class MarineWorkerController {
   @ApiOperation({ summary: 'Create a warning report' })
   @ApiResponse({ status: 201, description: 'Warning created successfully' })
   @ApiResponse({ status: 404, description: 'Marine worker profile not found' })
-  async createWarning(@Request() req: ExpressRequest & { user: { id: string } }, @Body() createWarningDto: CreateWarningDto) {
+  async createWarning(@Request() req: ExpressRequest & { user: { id: string } }, @Body() createWarningDto: CreateMarineWorkerWarningDto) {
     const userId = req.user.id;
     return this.marineWorkerService.createWarning(userId, createWarningDto);
   }

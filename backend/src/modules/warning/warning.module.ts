@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { WarningService } from './warning.service';
 import { WarningController } from './warning.controller';
-import { QueueModule } from '../queue/queue.module';
+// import { QueueModule } from '../queue/queue.module';
 
 @Module({
-  imports: [QueueModule],
+  imports: [],
   providers: [WarningService],
   controllers: [WarningController],
   exports: [WarningService],

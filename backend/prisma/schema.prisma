@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -43,8 +43,8 @@ model Report {
   type         String
   description  String
   mediaUrl     String?
-  // GeoJSON Point stored via PostGIS geometry
-  location     Unsupported("geometry(Point,4326)")
+  // GeoJSON Point stored as text (SQLite compatible)
+  location     String
   trustScore   Float    @default(0)
   status       String   @default("pending")
   createdAt    DateTime @default(now())
@@ -61,7 +61,7 @@ model ResourceRequest {
   type        String
   description String
   urgency     Int      @default(1)
-  location    Unsupported("geometry(Point,4326)")
+  location    String
   status      String   @default("pending")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -76,7 +76,7 @@ model Warning {
   message     String
   message_i18n Json?   // translations map
   severity    Int      // 1-5
-  area        Unsupported("geometry(Polygon,4326)")
+  area        String
   validFrom   DateTime
   validTo     DateTime
   createdAt   DateTime @default(now())
@@ -90,7 +90,7 @@ model ForumPost {
   content     String
   content_i18n Json?   // legacy
   mediaUrl    String?
-  location    Unsupported("geometry(Point,4326)")?
+  location    String?
   trustScore  Float    @default(0)
   urgencyScore Int?    // 0-100
   aiStatus    String?  // pending | ready | error
@@ -137,7 +137,7 @@ model SocialPost {
   platform   String
   content    String
   mediaUrl   String?
-  location   Unsupported("geometry(Point,4326)")?
+  location   String?
   trustScore Float    @default(0)
   createdAt  DateTime @default(now())
 }
@@ -147,7 +147,7 @@ model SOS {
   userId      String
   user        User     @relation(fields: [userId], references: [id])
   message     String?
-  location    Unsupported("geometry(Point,4326)")
+  location    String
   delivered   Boolean  @default(false)
   channel     String   // internet | mesh | sms | call
   createdAt   DateTime @default(now())
@@ -193,7 +193,7 @@ model MarineWorkerWarning {
   marineWorker    MarineWorker @relation(fields: [marineWorkerId], references: [id])
   description     String
   severity        Int         @default(1) // 1-5
-  location        Unsupported("geometry(Point,4326)")?
+  location        String?
   createdAt       DateTime    @default(now())
 }
 

@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsInt, Min, Max } from 'class-validator';
 
-export class CreateWarningDto {
+export class CreateMarineWorkerWarningDto {
   @IsString()
   @IsNotEmpty()
   description!: string;

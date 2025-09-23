@@ -1,16 +1,21 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+// Force refresh to pick up Prisma client types
 import { CreateMarineWorkerDto } from './dto/create-marine-worker.dto';
 import { UpdateWorkDetailsDto } from './dto/update-work-details.dto';
-import { CreateWarningDto } from './dto/create-warning.dto';
+import { CreateMarineWorkerWarningDto } from './dto/create-warning.dto';
 
 @Injectable()
 export class MarineWorkerService {
   constructor(private prisma: PrismaService) {}
+  
+  private get prismaClient() {
+    return this.prisma as any;
+  }
 
   async createMarineWorker(userId: string, createMarineWorkerDto: CreateMarineWorkerDto) {
     // Check if user already has a marine worker profile
-    const existingMarineWorker = await this.prisma.marineWorker.findUnique({
+    const existingMarineWorker = await this.prismaClient.marineWorker.findUnique({
       where: { userId },
     });
 
@@ -19,13 +24,13 @@ export class MarineWorkerService {
     }
 
     // Update user role to marine_worker
-    await this.prisma.user.update({
+    await this.prismaClient.user.update({
       where: { id: userId },
       data: { role: 'marine_worker' },
     });
 
     // Create marine worker profile
-    const marineWorker = await this.prisma.marineWorker.create({
+    const marineWorker = await this.prismaClient.marineWorker.create({
       data: {
         userId,
         name: createMarineWorkerDto.name,
@@ -41,7 +46,7 @@ export class MarineWorkerService {
   }
 
   async getMarineWorker(userId: string) {
-    const marineWorker = await this.prisma.marineWorker.findUnique({
+    const marineWorker = await this.prismaClient.marineWorker.findUnique({
       where: { userId },
       include: {
         user: true,
@@ -59,7 +64,7 @@ export class MarineWorkerService {
   async updateWorkDetails(userId: string, updateWorkDetailsDto: UpdateWorkDetailsDto) {
     const marineWorker = await this.getMarineWorker(userId);
 
-    const updatedMarineWorker = await this.prisma.marineWorker.update({
+    const updatedMarineWorker = await this.prismaClient.marineWorker.update({
       where: { id: marineWorker.id },
       data: {
         workToday: updateWorkDetailsDto.workToday,
@@ -73,10 +78,10 @@ export class MarineWorkerService {
     return updatedMarineWorker;
   }
 
-  async createWarning(userId: string, createWarningDto: CreateWarningDto) {
+  async createWarning(userId: string, createWarningDto: CreateMarineWorkerWarningDto) {
     const marineWorker = await this.getMarineWorker(userId);
 
-    const warning = await this.prisma.marineWorkerWarning.create({
+    const warning = await this.prismaClient.marineWorkerWarning.create({
       data: {
         marineWorkerId: marineWorker.id,
         description: createWarningDto.description,
@@ -90,7 +95,7 @@ export class MarineWorkerService {
   async getWarnings(userId: string) {
     const marineWorker = await this.getMarineWorker(userId);
 
-    const warnings = await this.prisma.marineWorkerWarning.findMany({
+    const warnings = await this.prismaClient.marineWorkerWarning.findMany({
       where: { marineWorkerId: marineWorker.id },
       orderBy: { createdAt: 'desc' },
     });
@@ -99,7 +104,7 @@ export class MarineWorkerService {
   }
 
   async getAllMarineWorkers() {
-    return this.prisma.marineWorker.findMany({
+    return this.prismaClient.marineWorker.findMany({
       include: {
         user: true,
         warnings: true,
