@@ -33,8 +33,8 @@ import ForumScreen from './src/screens/ForumScreen';
 import AdminDashboardScreen from './src/screens/AdminDashboardScreen';
 
 // Components
-import FloatingSOSButton from './src/components/FloatingSOSButton';
 import TabBarIcon from './src/components/TabBarIcon';
+import FloatingChatbotButton from './src/components/FloatingChatbotButton';
 
 // Services
 import { i18n } from './src/services/i18n';
@@ -162,7 +162,7 @@ function MainTabs() {
           />
         )}
       </Tab.Navigator>
-      <FloatingSOSButton />
+      <FloatingChatbotButton />
     </>
   );
 }

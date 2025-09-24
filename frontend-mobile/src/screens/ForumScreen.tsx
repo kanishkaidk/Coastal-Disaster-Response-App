@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../stores/authStore';
 import api from '../services/api';
+import VoiceTextInput from '../components/VoiceTextInput';
 
 interface ForumPost {
   id: string;
@@ -241,23 +242,22 @@ const ForumScreen: React.FC = () => {
         <View style={styles.createForm}>
           <Text style={styles.formTitle}>Create New Post</Text>
           
-          <TextInput
-            style={styles.formInput}
+          <VoiceTextInput
             value={newPostTitle}
             onChangeText={setNewPostTitle}
             placeholder="Post title"
             placeholderTextColor="#9ca3af"
+            style={styles.formInput}
           />
           
-          <TextInput
-            style={[styles.formInput, styles.formTextArea]}
+          <VoiceTextInput
             value={newPostContent}
             onChangeText={setNewPostContent}
             placeholder="What's on your mind?"
             placeholderTextColor="#9ca3af"
             multiline
             numberOfLines={4}
-            textAlignVertical="top"
+            style={[styles.formInput, styles.formTextArea]}
           />
 
           <View style={styles.formRow}>

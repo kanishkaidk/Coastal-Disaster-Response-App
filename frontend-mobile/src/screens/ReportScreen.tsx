@@ -27,6 +27,7 @@ import { typography, spacing, borderRadius, colors, shadows } from '../theme/the
 import locationService from '../services/locationService';
 import cameraService from '../services/cameraService';
 import apiService from '../services/api';
+import VoiceTextInput from '../components/VoiceTextInput';
 
 interface MediaAsset {
   uri: string;
@@ -1070,19 +1071,16 @@ const ReportScreen: React.FC = () => {
                 <Text style={styles.required}>*</Text>
               </View>
               <View style={styles.inputContainer}>
-                <TextInput
-                  style={[
-                    styles.input,
-                    errors.title && touched.title && styles.inputError,
-                    title.length > 0 && styles.inputFocused,
-                    fieldValidations.title && styles.inputValid
-                  ]}
+                <VoiceTextInput
                   value={title}
                   onChangeText={(value) => handleFieldChange('title', value)}
                   placeholder="Brief description of the hazard"
                   placeholderTextColor={colors.gray400}
-                  accessible={true}
-                  accessibilityLabel="Hazard title input"
+                  style={[
+                    errors.title && touched.title && styles.inputError,
+                    title.length > 0 && styles.inputFocused,
+                    fieldValidations.title && styles.inputValid
+                  ]}
                 />
                 <View style={styles.inputIcon}>
                   {fieldValidations.title ? (
@@ -1113,22 +1111,17 @@ const ReportScreen: React.FC = () => {
                 <Text style={styles.required}>*</Text>
               </View>
               <View style={styles.inputContainer}>
-                <TextInput
-                  style={[
-                    styles.input,
-                    styles.textArea,
-                    errors.description && touched.description && styles.inputError,
-                    fieldValidations.description && styles.inputValid
-                  ]}
+                <VoiceTextInput
                   value={description}
                   onChangeText={(value) => handleFieldChange('description', value)}
                   placeholder="Provide detailed information about the hazard..."
                   placeholderTextColor={colors.gray400}
                   multiline
                   numberOfLines={4}
-                  textAlignVertical="top"
-                  accessible={true}
-                  accessibilityLabel="Hazard description input"
+                  style={[
+                    errors.description && touched.description && styles.inputError,
+                    fieldValidations.description && styles.inputValid
+                  ]}
                 />
                 <View style={[styles.inputIcon, styles.textAreaIcon]}>
                   {fieldValidations.description ? (
@@ -1671,17 +1664,13 @@ const ReportScreen: React.FC = () => {
                 {/* Specific Needs */}
                 <View style={styles.emergencyField}>
                   <Text style={styles.emergencyFieldLabel}>Specific needs or notes</Text>
-                  <TextInput
-                    style={[styles.emergencyFieldInput, styles.emergencyFieldTextArea]}
+                  <VoiceTextInput
                     value={specificNeeds}
                     onChangeText={setSpecificNeeds}
                     placeholder="e.g., 'Need first aid for an injured person' or 'Trapped in my vehicle'"
                     placeholderTextColor={colors.gray400}
                     multiline
                     numberOfLines={3}
-                    textAlignVertical="top"
-                    accessible={true}
-                    accessibilityLabel="Specific emergency needs or notes"
                   />
                 </View>
               </View>

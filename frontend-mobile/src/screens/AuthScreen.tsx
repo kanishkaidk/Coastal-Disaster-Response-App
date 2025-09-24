@@ -20,6 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../stores/authStore';
 import { useAccessibilityStore } from '../stores/accessibilityStore';
 import { colors, typography, spacing, borderRadius, shadows } from '../theme/theme';
+import VoiceTextInput from '../components/VoiceTextInput';
 
 const AuthScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -184,16 +185,12 @@ const AuthScreen: React.FC = () => {
               🇮🇳 +91
             </Text>
           </View>
-          <TextInput
-            style={[styles.phoneInput, { fontSize: getFontSize() }]}
+          <VoiceTextInput
             value={phone}
             onChangeText={setPhone}
             placeholder={t('phonePlaceholder')}
             placeholderTextColor={colors.gray400}
-            keyboardType="phone-pad"
-            accessible={true}
-            accessibilityLabel="Phone number input"
-            accessibilityHint="Enter your 10-digit phone number"
+            style={[styles.phoneInput, { fontSize: getFontSize() }]}
           />
         </View>
       </View>
@@ -400,24 +397,19 @@ const AuthScreen: React.FC = () => {
         ))}
 
         <View style={styles.addContactContainer}>
-          <TextInput
-            style={[styles.contactInput, { fontSize: getFontSize() }]}
+          <VoiceTextInput
             value={newContact.name}
             onChangeText={(text) => setNewContact({ ...newContact, name: text })}
             placeholder="Contact Name"
             placeholderTextColor={colors.gray400}
-            accessible={true}
-            accessibilityLabel="Emergency contact name"
-          />
-          <TextInput
             style={[styles.contactInput, { fontSize: getFontSize() }]}
+          />
+          <VoiceTextInput
             value={newContact.phone}
             onChangeText={(text) => setNewContact({ ...newContact, phone: text })}
             placeholder="Phone Number"
             placeholderTextColor={colors.gray400}
-            keyboardType="phone-pad"
-            accessible={true}
-            accessibilityLabel="Emergency contact phone"
+            style={[styles.contactInput, { fontSize: getFontSize() }]}
           />
           <TouchableOpacity
             style={styles.addContactButton}
