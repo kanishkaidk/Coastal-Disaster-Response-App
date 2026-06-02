@@ -35,11 +35,15 @@ The project is structured as a monorepo containing the mobile application, backe
 ├── frontend-mobile/     # React Native mobile application built with Expo & TypeScript
 └── seed/                # Database seeding scripts and mock environmental data
 
+---
+
 ## Frontend & Mobile Core
 Framework: React Native (Expo Managed Workflow)
 Language: TypeScript (.tsx, .ts)
 Styling: NativeWind (Tailwind CSS for React Native)
 State & Navigation: Expo Router / React Navigation
+
+---
 
 ###⚙️ Getting Started
 ##Prerequisites
@@ -49,35 +53,40 @@ Node.js (v18 or higher recommended)
 npm or yarn
 Expo Go app on your iOS/Android device (for physical testing)
 
+---
+
 ##Installation & Local Setup
 Clone the Repository
 Bash
 ```text
    git clone [https://github.com/your-username/coast-kavach.git](https://github.com/your-username/coast-kavach.git)
    cd coast-kavach
+---
 Configure Environment Variables
 Look for the .env.example file in the root directory. Create your local environment file:
 ```text
 Bash
    cp .env.example .env
 Open .env and fill in your backend API URLs, maps keys, and AI service endpoints.
-
+---
 ##Install Dependencies
 Navigate to the mobile frontend directory (or install from the root if workspaces are configured):
 ```text
 Bash
    cd frontend-mobile
    npm install
+---
 Start the Development Server
 ```text
 Bash
    npx expo start
+---
 ##Run the App
-
+---
 Scan the QR code printed in the terminal using your Expo Go app (Android) or default Camera app (iOS).
 
 Press a for Android Emulator or i for iOS Simulator if they are configured on your machine.
-
+---
 ###🧩 Configuration Files
 1. app.json: Holds global Expo configurations including app naming, icons, splash screens, and native permission settings (Camera, Location).
 2. tailwind.config.js & nativewind-env.d.ts: Configured handles for the Tailwind utility-first styling compiler tailored for mobile layouts.
