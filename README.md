@@ -61,3 +61,30 @@ Ensure you have the following installed on your local machine:
    git clone [https://github.com/your-username/coast-kavach.git](https://github.com/your-username/coast-kavach.git)
    cd coast-kavach
 ```
+### ⚙️ Configure Environment Variables
+Look for the `.env.example` file in the root directory. Create your local environment file:
+
+```bash
+cp .env.example .env
+```
+### Install Dependencies
+Navigate to the mobile frontend directory (or install from the root if workspaces are configured):
+```bash
+cd frontend-mobile
+npm install
+```
+### Start the Development Server
+```bash
+npx expo start
+```
+
+### Run the App
+Scan the QR code printed in the terminal using your Expo Go app (Android) or default Camera app (iOS).
+Press a for Android Emulator or i for iOS Simulator if they are configured on your machine.
+
+---
+## Configuration Files
+1. app.json: Holds global Expo configurations including app naming, icons, splash screens, and native permission settings (Camera, Location).
+2. tailwind.config.js & nativewind-env.d.ts: Configured handles for the Tailwind utility-first styling compiler tailored for mobile layouts.
+3. package.json: Manages project dependencies, engines, and automated execution scripts.
+
